@@ -1,0 +1,146 @@
+# API Contracts: Python Console Todo App
+
+**Feature**: 1-python-todo-app
+**Date**: 2025-12-28
+
+## Menu Interface Contract
+
+All user interactions flow through the main menu interface.
+
+### Main Menu
+
+```
+Input: Integer 1-7
+Output: Navigate to selected operation
+
+1. Add Task      -> AddTaskView
+2. View Tasks    -> ViewTasksView
+3. Update Task   -> UpdateTaskView
+4. Delete Task   -> DeleteTaskView
+5. Mark Complete -> ToggleCompletionView (complete)
+6. Mark Incomplete -> ToggleCompletionView (incomplete)
+7. Exit          -> Terminate application
+```
+
+---
+
+## Operation Contracts
+
+### Operation: Add Task
+
+**Input View**: `AddTaskView`
+
+| Field | Prompt | Validation | Error Message |
+|-------|--------|------------|---------------|
+| title | "Enter task title:" | Non-empty after strip | "Title cannot be empty. Please enter a task title." |
+| description | "Enter task description (optional):" | None (optional) | N/A |
+
+**Success Output**:
+```
+Task [ID] created successfully
+```
+
+**Failure Output**:
+- Empty title: "Title cannot be empty. Please enter a task title."
+
+---
+
+### Operation: View Tasks
+
+**Input View**: `ViewTasksView` (no input required)
+
+**Success Output** (tasks exist):
+```
++----+------------------+------------------+------------+
+| ID | Title            | Description      | Status     |
++----+------------------+------------------+------------+
+| 1  | Buy groceries    | Milk, eggs, bread| Incomplete |
+| 2  | Call dentist     | Appointment Fri  | Complete   |
++----+------------------+------------------+------------+
+```
+
+**Empty Output**:
+```
+No tasks available.
+```
+
+---
+
+### Operation: Update Task
+
+**Input View**: `UpdateTaskView`
+
+| Field | Prompt | Validation | Error Message |
+|-------|--------|------------|---------------|
+| task_id | "Enter task ID:" | Positive int, must exist | "Task with ID [X] not found." |
+| title | "Enter new title (leave empty to keep current):" | None (optional) | N/A |
+| description | "Enter new description (leave empty to keep current):" | None (optional) | N/A |
+
+**Success Output**:
+```
+Task [ID] updated successfully
+```
+
+**Failure Output**:
+- Non-existent ID: "Task with ID [X] not found."
+- Invalid ID format: "Invalid ID. Please enter a positive number."
+
+---
+
+### Operation: Delete Task
+
+**Input View**: `DeleteTaskView`
+
+| Field | Prompt | Validation | Error Message |
+|-------|--------|------------|---------------|
+| task_id | "Enter task ID:" | Positive int, must exist | "Task with ID [X] not found." |
+
+**Success Output**:
+```
+Task [ID] deleted successfully
+```
+
+**Failure Output**:
+- Non-existent ID: "Task with ID [X] not found."
+- Invalid ID format: "Invalid ID. Please enter a positive number."
+
+---
+
+### Operation: Toggle Completion
+
+**Input View**: `ToggleCompletionView`
+
+| Field | Prompt | Validation | Error Message |
+|-------|--------|------------|---------------|
+| task_id | "Enter task ID:" | Positive int, must exist | "Task with ID [X] not found." |
+
+**Success Output**:
+- Mark complete: "Task [ID] marked as complete."
+- Mark incomplete: "Task [ID] marked as incomplete."
+
+**Failure Output**:
+- Non-existent ID: "Task with ID [X] not found."
+- Invalid ID format: "Invalid ID. Please enter a positive number."
+
+---
+
+### Operation: Exit
+
+**Input View**: `ExitView` (no input)
+
+**Behavior**: Terminates the application with code 0
+
+---
+
+## Error Handling Contract
+
+### Global Error Responses
+
+| Scenario | Response |
+|----------|----------|
+| Invalid menu choice | "Invalid choice. Please enter a number between 1 and 7." |
+| Invalid ID format | "Invalid ID. Please enter a positive number." |
+| Non-existent ID | "Task with ID [X] not found." |
+| No tasks available (view) | "No tasks available." |
+| Empty title (add/update) | "Title cannot be empty. Please enter a task title." |
+| Unexpected error | "An error occurred. Please try again." (no stack trace) |
