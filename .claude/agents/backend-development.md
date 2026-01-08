@@ -30,3 +30,98 @@ When you identify significant architectural decisions (e.g., choosing a database
 - Adhere to all standards defined in `.specify/memory/constitution.md`.
 - Ensure all changes are small, testable, and reference code precisely using `(start:end:path)` format.
 - Use MCP tools for all information gathering; never assume file states.
+
+---
+
+## Project Technology Stack (Phase 2 Backend)
+
+### Backend Framework
+- **FastAPI**: Modern, fast web framework for building APIs with Python 3.11+
+  - Automatic request validation via Pydantic
+  - Async/await support for high performance
+  - Built-in OpenAPI documentation (`/docs`, `/redoc`)
+
+### Data Layer
+- **SQLModel**: ORM built on Pydantic + SQLAlchemy 2.0
+  - Single source of truth for database schemas and Pydantic models
+  - Type-safe, IDE-friendly database operations
+  - Automatic validation at database boundary
+
+### Database
+- **Neon PostgreSQL**: Serverless PostgreSQL database
+  - Connection string: `postgresql+asyncpg://user:password@host/database`
+  - Asynchronous driver: `asyncpg` for non-blocking I/O
+  - Auto-scaling, no server management
+  - Manual SQL migrations for schema evolution (no Alembic in Phase 2)
+
+### Authentication
+- **Better Auth**: JWT-based authentication provider
+  - JWT verification using `python-jose[cryptography]`
+  - HS256 algorithm with shared secret (`BETTER_AUTH_SECRET`)
+  - User ID extracted from `sub` claim in JWT
+  - User isolation enforced at API layer (URL user_id must match JWT sub)
+
+### Web Server
+- **Uvicorn**: ASGI server for FastAPI
+  - Development: `uvicorn src.main:app --reload`
+  - Production: `uvicorn src.main:app --host 0.0.0.0 --port 8000`
+
+### Testing
+- **pytest**: Python testing framework
+- **pytest-asyncio**: Async test support
+- **httpx**: Async HTTP client for API testing
+- Test fixtures for database session isolation
+
+### Project Structure
+```
+backend/
+├── pyproject.toml          # Dependencies and config
+├── .env.example             # Environment variables template
+├── src/
+│   ├── __init__.py
+│   ├── main.py              # FastAPI app entry point
+│   ├── config.py            # Environment loading
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── task.py          # Task SQLModel
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── task_service.py  # Task business logic
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── deps.py          # Dependencies (JWT, DB session)
+│   │   └── tasks.py         # Task endpoints
+│   └── db.py                # Database engine setup
+└── tests/
+    ├── __init__.py
+    ├── conftest.py          # Pytest fixtures
+    └── test_tasks.py        # Task endpoint tests
+```
+
+### Key Architectural Patterns
+1. **Layered Architecture**: Clear separation between models, services, and API
+2. **JWT Dependency Injection**: `HTTPBearer` security scheme with `verify_jwt()` dependency
+3. **User Isolation**: All queries scoped to `user_id` from JWT
+4. **Async Database**: All database operations use `AsyncSession` with `asyncpg`
+5. **Structured Errors**: Consistent error response format with `error`, `message`, `details` fields
+
+### Environment Variables Required
+```bash
+DATABASE_URL=postgresql+asyncpg://user:password@host/database
+BETTER_AUTH_SECRET=your-secret-key
+API_HOST=localhost
+API_PORT=8000
+```
+
+### API Endpoints (Phase 2 Step 1)
+- `GET /api/{user_id}/tasks` - List user's tasks
+- `POST /api/{user_id}/tasks` - Create new task
+- `GET /api/{user_id}/tasks/{task_id}` - Get single task
+- `PUT /api/{user_id}/tasks/{task_id}` - Update task
+- `DELETE /api/{user_id}/tasks/{task_id}` - Delete task
+- `PATCH /api/{user_id}/tasks/{task_id}/complete` - Toggle completion
+
+### OpenAPI Documentation
+- Auto-generated at: `http://localhost:8000/docs` (Swagger UI)
+- Alternative: `http://localhost:8000/redoc` (ReDoc)
+- Schema definition: `specs/Phase-2-full-stack-web-todo/002-backend-foundation/contracts/openapi.yaml`
