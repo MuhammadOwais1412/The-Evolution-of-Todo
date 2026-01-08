@@ -1,42 +1,168 @@
 ---
-name: frontend-design
-description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.
+name: frontend-ui-design
+description: Design and implement visually compelling, responsive, and user-centered frontend interfaces that combine aesthetic excellence with strong usability, brand coherence, and psychological clarity. Use this skill for building high-impact web interfaces, components, and applications.
 version: "1.0.0"
 ---
 
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+This skill defines how to create **attractive, responsive, and high-conversion user interfaces** that balance **visual dominance, usability, and performance**.
 
-The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+The focus is on **intentional UI design**—interfaces that look exceptional, communicate clearly, guide user behavior, and feel effortless to use across devices.
 
-## Design Thinking
+The user provides frontend requirements such as pages, components, or applications, including audience, product goals, and technical constraints.
 
-Before coding, understand the context and commit to a BOLD aesthetic direction:
-- **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
-- **Constraints**: Technical requirements (framework, performance, accessibility).
-- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+---
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+## Design Intent & UI Strategy
 
-Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
-- Production-grade and functional
-- Visually striking and memorable
-- Cohesive with a clear aesthetic point-of-view
-- Meticulously refined in every detail
+Before writing any code or layout, establish a **clear visual and experiential strategy**:
 
-## Frontend Aesthetics Guidelines
+- **User Goal Alignment**: What action should the user take? What decisions must feel obvious?
+- **Visual Hierarchy**: What must be seen first, second, and last?
+- **Brand Expression**: How should the interface visually communicate trust, personality, and tone?
+- **Context of Use**: Device, environment, attention span, and user expectations.
+- **Constraints**: Performance budgets, accessibility standards, framework limitations.
 
-Focus on:
-- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-- **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
-- **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+**CRITICAL**: Attractive UI is not decoration—it is structured communication. Every visual choice must support clarity and intent.
 
-NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
+---
 
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
+## Visual Hierarchy & Dominance
 
-**IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+Design interfaces that guide the eye deliberately:
 
-Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+- Establish **clear primary, secondary, and tertiary elements**
+- Use **size, contrast, spacing, and alignment** to control attention
+- Create strong focal points that anchor the interface
+- Reduce cognitive load by eliminating unnecessary visual noise
+
+High-quality UI makes the *correct action feel inevitable*.
+
+---
+
+## Typography & Readability
+
+Typography is a primary design system—not an afterthought.
+
+- Use **purposeful font pairings** (display + body) with distinct roles
+- Optimize **line length, line height, and font weight** for readability
+- Use typographic scale to reinforce hierarchy
+- Avoid default system fonts unless intentionally aligned with brand goals
+
+Typography should enhance comprehension, not compete for attention.
+
+---
+
+## Color Systems & Brand Psychology
+
+Color choices must be **intentional and restrained**:
+
+- Define a clear **primary color** with functional accent colors
+- Use contrast to signal interactivity and importance
+- Apply color psychology to reinforce mood and trust
+- Ensure WCAG contrast compliance without sacrificing aesthetics
+
+Strong interfaces use **few colors confidently**, not many colors timidly.
+
+---
+
+## Layout, Spacing & Composition
+
+Structure interfaces with precision:
+
+- Use consistent spacing systems (4px/8px rhythm)
+- Favor whitespace to improve scanability and focus
+- Apply grids flexibly—break them intentionally when it adds emphasis
+- Balance density and breathing room based on content type
+
+Good spacing is invisible; bad spacing is immediately felt.
+
+---
+
+## Responsiveness & Adaptability
+
+Design for **real-world usage across devices**:
+
+- Mobile-first layout logic
+- Adaptive typography and spacing
+- Touch-friendly hit targets
+- Content prioritization for small screens
+
+Responsive design is not resizing—it is **recomposition**.
+
+---
+
+## Interaction Design & Motion
+
+Motion should clarify, not distract:
+
+- Use animation to explain state changes
+- Apply transitions to reinforce hierarchy and flow
+- Prioritize meaningful micro-interactions over excessive effects
+- Keep motion performant and purposeful
+
+Motion is feedback—not decoration.
+
+---
+
+## Usability & UX Principles
+
+Every interface must respect user cognition:
+
+- Minimize decision fatigue
+- Make system status visible
+- Use familiar patterns intentionally
+- Prevent errors before they happen
+- Provide clear affordances and feedback
+
+If users need instructions, the UI has already failed.
+
+---
+
+## Accessibility & Inclusivity
+
+Attractive UI must also be usable by everyone:
+
+- Semantic HTML structure
+- Keyboard navigability
+- Sufficient contrast ratios
+- Accessible focus states
+- Screen reader–friendly components
+
+Accessibility improves usability for *all* users—not just edge cases.
+
+---
+
+## Implementation Quality Standards
+
+UI code must be:
+
+- Clean, modular, and reusable
+- Consistent in naming and structure
+- Free from unnecessary complexity
+- Optimized for performance and maintainability
+
+Beautiful UI loses value if the codebase is fragile.
+
+---
+
+## Success Criteria
+
+A frontend implementation is successful when:
+
+- The interface is visually striking and coherent
+- Users instantly understand what to do
+- The design scales across devices gracefully
+- Visual hierarchy feels intentional
+- The UI reinforces brand trust and product quality
+
+---
+
+## Philosophy
+
+Great UI design sits at the intersection of:
+
+**Aesthetics × Psychology × Engineering**
+
+This skill enforces discipline, taste, and user empathy—ensuring interfaces are not only beautiful, but *effective*.
+
+Design with intent. Build with precision.
