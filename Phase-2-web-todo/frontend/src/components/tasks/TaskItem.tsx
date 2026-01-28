@@ -14,6 +14,7 @@ interface TaskItemProps {
   onDelete?: (taskId: number) => void;
   onEdit?: (task: Task) => void;
   onToggle?: (updatedTask: Task) => void;
+<<<<<<< HEAD
   isTaskToggling?: (taskId: number) => boolean;  // Function to check if task is currently toggling
   toggleCompletion?: (taskId: number) => Promise<Task>;  // Function to toggle completion from context
 }
@@ -31,10 +32,33 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
     } catch (err) {
       console.error("Failed to toggle task:", err);
       alert(err instanceof Error ? err.message : "Failed to update task");
+=======
+}
+
+export function TaskItem({ task, userId, onDelete, onEdit, onToggle }: TaskItemProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  async function handleToggle() {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const updated = await toggleCompletion(userId, task.id);
+      if (onToggle) {
+        onToggle(updated);
+      }
+    } catch (err) {
+      console.error("Failed to toggle task:", err);
+      alert(err instanceof Error ? err.message : "Failed to update task");
+    } finally {
+      setIsLoading(false);
+>>>>>>> 003-frontend-better-auth
     }
   }
 
   async function handleDelete() {
+<<<<<<< HEAD
     if (!onDelete) return;
 
     try {
@@ -43,6 +67,22 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
     } catch (err) {
       console.error("Failed to delete task:", err);
       alert(err instanceof Error ? err.message : "Failed to delete task");
+=======
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      await deleteTask(userId, task.id);
+      if (onDelete) {
+        onDelete(task.id);
+      }
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+      alert(err instanceof Error ? err.message : "Failed to delete task");
+    } finally {
+      setIsLoading(false);
+      setShowDeleteConfirm(false);
+>>>>>>> 003-frontend-better-auth
     }
   }
 
@@ -71,6 +111,7 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
         {/* Completion Toggle */}
         <button
           onClick={handleToggle}
+<<<<<<< HEAD
           disabled={isTaskToggling?.(task.id) || false}
           className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 touch-manipulation min-w-[44px] min-h-[44px] transition-colors ${
             isTaskToggling?.(task.id)
@@ -96,6 +137,17 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
               />
             </svg>
           ) : task.completed ? (
+=======
+          disabled={isLoading}
+          className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 touch-manipulation min-w-[44px] min-h-[44px] transition-colors ${
+            task.completed
+              ? "bg-green-500 border-green-500 text-white"
+              : "border-gray-300 hover:border-green-500 hover:bg-green-50"
+          }`}
+          aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+        >
+          {task.completed && (
+>>>>>>> 003-frontend-better-auth
             <svg
               className="w-4 h-4"
               fill="none"
@@ -109,7 +161,11 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
                 d="M5 13l4 4L19 7"
               />
             </svg>
+<<<<<<< HEAD
           ) : null}
+=======
+          )}
+>>>>>>> 003-frontend-better-auth
         </button>
 
         {/* Task Content */}
@@ -140,7 +196,11 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
           {onEdit && (
             <button
               onClick={handleEditClick}
+<<<<<<< HEAD
               disabled={isTaskToggling?.(task.id) || false}
+=======
+              disabled={isLoading}
+>>>>>>> 003-frontend-better-auth
               className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors touch-manipulation min-w-[44px] min-h-[44px]"
               aria-label="Edit task"
               title="Edit task"
@@ -163,8 +223,13 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
 
           {onDelete && (
             <button
+<<<<<<< HEAD
               onClick={() => !isTaskToggling?.(task.id) && setShowDeleteConfirm(true)}
               disabled={isTaskToggling?.(task.id) || false}
+=======
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isLoading}
+>>>>>>> 003-frontend-better-auth
               className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors touch-manipulation min-w-[44px] min-h-[44px]"
               aria-label="Delete task"
               title="Delete task"
@@ -196,6 +261,7 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
           <div className="flex gap-2">
             <button
               onClick={handleDelete}
+<<<<<<< HEAD
               disabled={isTaskToggling?.(task.id) || false}
               className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors min-h-[36px]"
             >
@@ -204,6 +270,16 @@ export function TaskItem({ task, userId, onDelete, onEdit, onToggle, isTaskToggl
             <button
               onClick={() => setShowDeleteConfirm(false)}
               disabled={isTaskToggling?.(task.id) || false}
+=======
+              disabled={isLoading}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-red-300 disabled:cursor-not-allowed transition-colors min-h-[36px]"
+            >
+              {isLoading ? "Deleting..." : "Delete"}
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isLoading}
+>>>>>>> 003-frontend-better-auth
               className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[36px]"
             >
               Cancel

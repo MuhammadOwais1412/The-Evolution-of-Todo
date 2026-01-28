@@ -15,7 +15,10 @@ interface AuthContextType {
   userId: string | null;
   user: User | null;
   isLoading: boolean;
+<<<<<<< HEAD
   isTokenReady: boolean;  // Indicates if JWT token is synchronized with API client
+=======
+>>>>>>> 003-frontend-better-auth
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name?: string) => Promise<void>;
@@ -29,7 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session, error: sessionError, isPending, refetch } = authClient.useSession();
 
   const [error, setError] = useState<string | null>(null);
+<<<<<<< HEAD
   const [isTokenReady, setIsTokenReady] = useState<boolean>(false); // Track if JWT token is ready
+=======
+>>>>>>> 003-frontend-better-auth
 
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id ?? null;
@@ -47,7 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function syncToken() {
       if (!session?.user) {
         setToken(null);
+<<<<<<< HEAD
         setIsTokenReady(false);
+=======
+>>>>>>> 003-frontend-better-auth
         return;
       }
 
@@ -56,12 +65,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (tokenError || !data?.token) {
         setToken(null);
+<<<<<<< HEAD
         setIsTokenReady(false);
+=======
+>>>>>>> 003-frontend-better-auth
         return;
       }
 
       setToken(data.token);
+<<<<<<< HEAD
       setIsTokenReady(true);
+=======
+>>>>>>> 003-frontend-better-auth
     }
 
     void syncToken();
@@ -133,14 +148,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userId,
       user,
       isLoading: isPending,
+<<<<<<< HEAD
       isTokenReady,
+=======
+>>>>>>> 003-frontend-better-auth
       error,
       login,
       signup,
       logout,
       refreshSession,
     }),
+<<<<<<< HEAD
     [isAuthenticated, userId, user, isPending, isTokenReady, error]
+=======
+    [isAuthenticated, userId, user, isPending, error]
+>>>>>>> 003-frontend-better-auth
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

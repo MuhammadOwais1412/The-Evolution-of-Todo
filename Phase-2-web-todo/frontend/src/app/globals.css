@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+=======
+@import "tailwindcss";
+>>>>>>> 003-frontend-better-auth
 
 :root {
   --background: #ffffff;
@@ -13,6 +17,20 @@
   --success-hover: #15803d;
 }
 
+<<<<<<< HEAD
+=======
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-success: var(--success);
+  --color-success-hover: var(--success-hover);
+}
+
+>>>>>>> 003-frontend-better-auth
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

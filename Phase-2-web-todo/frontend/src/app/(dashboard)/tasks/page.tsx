@@ -1,6 +1,10 @@
 "use client";
 
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
+=======
+import { useState } from "react";
+>>>>>>> 003-frontend-better-auth
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
@@ -12,6 +16,7 @@ import { EditTaskModal } from "@/components/tasks/EditTaskModal";
 
 export default function TasksPage() {
   const router = useRouter();
+<<<<<<< HEAD
   const { isAuthenticated, userId, isLoading: authLoading, isTokenReady, logout } = useAuth();
   const { tasks, isLoading, error, createTask, deleteTask, toggleCompletion, isTaskToggling, retryLoadTasks } = useTaskContext();
   const [isCreating, setIsCreating] = useState(false);
@@ -35,11 +40,25 @@ export default function TasksPage() {
 
   // Redirect if not authenticated (after useEffect has run)
   if (!isAuthenticated) {
+=======
+  const { isAuthenticated, userId, isLoading: authLoading, logout } = useAuth();
+  const { tasks, isLoading, error, createTask, deleteTask, toggleCompletion, retryLoadTasks } = useTaskContext();
+  const [isCreating, setIsCreating] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // Redirect if not authenticated
+  if (!authLoading && !isAuthenticated) {
+    router.push("/login");
+>>>>>>> 003-frontend-better-auth
     return null; // Render nothing while redirecting
   }
 
   async function handleCreateTask(title: string, description: string) {
+<<<<<<< HEAD
     if (!userId || !isTokenReady) return;
+=======
+    if (!userId) return;
+>>>>>>> 003-frontend-better-auth
 
     setIsCreating(true);
     try {
@@ -53,16 +72,37 @@ export default function TasksPage() {
   }
 
   function handleDeleteTask(taskId: number) {
+<<<<<<< HEAD
     if (!isTokenReady) return;
     void deleteTask(taskId);
   }
 
+=======
+    void deleteTask(taskId);
+  }
+
+  function handleToggleTask(task: Task) {
+    void toggleCompletion(task.id);
+  }
+>>>>>>> 003-frontend-better-auth
 
   async function handleLogout() {
     await logout();
     router.push("/login");
   }
 
+<<<<<<< HEAD
+=======
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+>>>>>>> 003-frontend-better-auth
   // Empty state for no tasks
   const hasNoTasks = !isLoading && tasks.length === 0;
 
@@ -173,8 +213,12 @@ export default function TasksPage() {
                 userId={userId || ""}
                 onDelete={handleDeleteTask}
                 onEdit={setEditingTask}
+<<<<<<< HEAD
                 isTaskToggling={isTokenReady ? (id) => isTaskToggling(id) : undefined}
                 toggleCompletion={isTokenReady ? (id) => toggleCompletion(id) : undefined}
+=======
+                onToggle={handleToggleTask}
+>>>>>>> 003-frontend-better-auth
               />
             ))}
           </div>

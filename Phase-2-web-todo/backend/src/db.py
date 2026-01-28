@@ -1,5 +1,8 @@
 """Database engine and session setup."""
+<<<<<<< HEAD
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+=======
+>>>>>>> 003-frontend-better-auth
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
 
@@ -7,6 +10,7 @@ from src.config import get_settings
 
 settings = get_settings()
 
+<<<<<<< HEAD
 # Sanitize the database URL for asyncpg compatibility
 raw_url = settings.database_url
 parsed = urlparse(raw_url)
@@ -23,11 +27,19 @@ database_url = urlunparse(
 # Create async engine for PostgreSQL with asyncpg
 engine = create_async_engine(
     database_url,
+=======
+# Create async engine for PostgreSQL with asyncpg
+engine = create_async_engine(
+    settings.database_url,
+>>>>>>> 003-frontend-better-auth
     echo=False,  # Set to True for SQL debugging
     pool_pre_ping=True,  # Enable connection health checks
     pool_size=5,
     max_overflow=10,
+<<<<<<< HEAD
     connect_args={"ssl": True},  # Enable SSL explicitly
+=======
+>>>>>>> 003-frontend-better-auth
 )
 
 # Async session factory

@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2017",
+<<<<<<< HEAD
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+=======
+    "lib": ["dom", "dom.iterable", "esnext"],
+>>>>>>> 003-frontend-better-auth
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -15,7 +19,11 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+<<<<<<< HEAD
     "jsx": "preserve",
+=======
+    "jsx": "react-jsx",
+>>>>>>> 003-frontend-better-auth
     "incremental": true,
     "plugins": [
       {
@@ -23,9 +31,13 @@
       }
     ],
     "paths": {
+<<<<<<< HEAD
       "@/*": [
         "./src/*"
       ]
+=======
+      "@/*": ["./src/*"]
+>>>>>>> 003-frontend-better-auth
     }
   },
   "include": [
@@ -36,7 +48,11 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
+<<<<<<< HEAD
   "exclude": [
     "node_modules"
   ]
+=======
+  "exclude": ["node_modules"]
+>>>>>>> 003-frontend-better-auth
 }
