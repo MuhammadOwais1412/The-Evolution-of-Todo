@@ -1,15 +1,23 @@
 """Environment configuration for the backend."""
 from typing import Optional
+from pydantic import Field
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     # Database connection
-    database_url: str = "postgresql+asyncpg://localhost/todo"
+    database_url: str = Field(..., alias="DATABASE_URL")
 
     # JWT secret for Better Auth token verification
-    better_auth_secret: str = "change-me-in-production"
+    better_auth_secret: str = Field(..., alias="BETTER_AUTH_SECRET")
+
+    # Better Auth base URL for fetching JWKS
+    better_auth_base_url: str = Field(default="http://localhost:3000", alias="BETTER_AUTH_BASE_URL")
 
     # API server configuration
     api_host: str = "localhost"

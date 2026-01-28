@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
@@ -12,19 +12,34 @@ import { EditTaskModal } from "@/components/tasks/EditTaskModal";
 
 export default function TasksPage() {
   const router = useRouter();
-  const { isAuthenticated, userId, isLoading: authLoading, logout } = useAuth();
-  const { tasks, isLoading, error, createTask, deleteTask, toggleCompletion, retryLoadTasks } = useTaskContext();
+  const { isAuthenticated, userId, isLoading: authLoading, isTokenReady, logout } = useAuth();
+  const { tasks, isLoading, error, createTask, deleteTask, toggleCompletion, isTaskToggling, retryLoadTasks } = useTaskContext();
   const [isCreating, setIsCreating] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  // Redirect if not authenticated
-  if (!authLoading && !isAuthenticated) {
-    router.push("/login");
+  // Redirect if not authenticated - moved to useEffect to avoid state update during render
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  // Show loading state while checking authentication or synchronizing token
+  if (authLoading || (isAuthenticated && !isTokenReady)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated (after useEffect has run)
+  if (!isAuthenticated) {
     return null; // Render nothing while redirecting
   }
 
   async function handleCreateTask(title: string, description: string) {
-    if (!userId) return;
+    if (!userId || !isTokenReady) return;
 
     setIsCreating(true);
     try {
@@ -38,25 +53,14 @@ export default function TasksPage() {
   }
 
   function handleDeleteTask(taskId: number) {
+    if (!isTokenReady) return;
     void deleteTask(taskId);
   }
 
-  function handleToggleTask(task: Task) {
-    void toggleCompletion(task.id);
-  }
 
   async function handleLogout() {
     await logout();
     router.push("/login");
-  }
-
-  // Loading state
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
   }
 
   // Empty state for no tasks
@@ -169,7 +173,8 @@ export default function TasksPage() {
                 userId={userId || ""}
                 onDelete={handleDeleteTask}
                 onEdit={setEditingTask}
-                onToggle={handleToggleTask}
+                isTaskToggling={isTokenReady ? (id) => isTaskToggling(id) : undefined}
+                toggleCompletion={isTokenReady ? (id) => toggleCompletion(id) : undefined}
               />
             ))}
           </div>

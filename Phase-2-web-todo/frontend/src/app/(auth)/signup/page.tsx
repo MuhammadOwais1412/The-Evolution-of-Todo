@@ -1,19 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup, isLoading: authLoading } = useAuth();
+  const { signup, isAuthenticated, isLoading: authLoading } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const hasRedirected = useRef(false);
+
+  // Check if user is already authenticated and redirect to dashboard
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.push("/tasks");
+    } else if (!authLoading && !isAuthenticated) {
+      setShowForm(true);
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  // Show loading state while checking authentication
+  if (authLoading || !showForm) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   function validateForm(): boolean {
     // Name validation

@@ -1,17 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading: authLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const hasRedirected = useRef(false);
+
+  // Check if user is already authenticated and redirect to dashboard
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.push("/tasks");
+    } else if (!authLoading && !isAuthenticated) {
+      setShowForm(true);
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  // Show loading state while checking authentication
+  if (authLoading || !showForm) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -91,7 +112,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don{"'"}t have an account?{" "}
           <Link href="/signup" className="text-blue-600 hover:text-blue-700 hover:underline">
             Sign up
           </Link>

@@ -133,6 +133,7 @@ class TaskService:
     ) -> bool:
         """
         Delete a task with user isolation.
+        This operation is idempotent - deleting an already deleted task returns True.
 
         Args:
             session: Database session
@@ -140,11 +141,22 @@ class TaskService:
             user_id: Owner user ID from JWT
 
         Returns:
-            True if deleted, False if not found
+            True if deletion was successful or task was already deleted, False if task doesn't belong to user
         """
         task = await TaskService.get_task_by_id(session, task_id, user_id)
         if task is None:
-            return False
+            # Task doesn't exist or doesn't belong to user
+            # For idempotency, if it doesn't exist, we consider it as successfully "deleted"
+            # But we need to distinguish between "already deleted" and "doesn't belong to user"
+            # Check if task exists but belongs to different user
+            stmt = select(Task).where(Task.id == task_id)
+            result = await session.execute(stmt)
+            existing_task = result.scalar_one_or_none()
+            if existing_task is not None and existing_task.user_id != user_id:
+                # Task exists but belongs to another user - return False to indicate unauthorized
+                return False
+            # Task doesn't exist at all or was already deleted - return True for idempotency
+            return True
 
         await session.delete(task)
         await session.commit()

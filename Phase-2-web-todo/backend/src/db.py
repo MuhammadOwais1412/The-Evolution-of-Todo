@@ -1,4 +1,5 @@
 """Database engine and session setup."""
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
 
@@ -6,13 +7,27 @@ from src.config import get_settings
 
 settings = get_settings()
 
+# Sanitize the database URL for asyncpg compatibility
+raw_url = settings.database_url
+parsed = urlparse(raw_url)
+query = parse_qs(parsed.query)
+
+# Remove asyncpg-incompatible query parameters
+query.pop("sslmode", None)
+query.pop("channel_binding", None)
+
+database_url = urlunparse(
+    parsed._replace(query=urlencode(query, doseq=True))
+)
+
 # Create async engine for PostgreSQL with asyncpg
 engine = create_async_engine(
-    settings.database_url,
+    database_url,
     echo=False,  # Set to True for SQL debugging
     pool_pre_ping=True,  # Enable connection health checks
     pool_size=5,
     max_overflow=10,
+    connect_args={"ssl": True},  # Enable SSL explicitly
 )
 
 # Async session factory

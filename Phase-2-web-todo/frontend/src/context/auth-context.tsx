@@ -15,6 +15,7 @@ interface AuthContextType {
   userId: string | null;
   user: User | null;
   isLoading: boolean;
+  isTokenReady: boolean;  // Indicates if JWT token is synchronized with API client
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name?: string) => Promise<void>;
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session, error: sessionError, isPending, refetch } = authClient.useSession();
 
   const [error, setError] = useState<string | null>(null);
+  const [isTokenReady, setIsTokenReady] = useState<boolean>(false); // Track if JWT token is ready
 
   const isAuthenticated = !!session?.user;
   const userId = session?.user?.id ?? null;
@@ -45,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function syncToken() {
       if (!session?.user) {
         setToken(null);
+        setIsTokenReady(false);
         return;
       }
 
@@ -53,10 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (tokenError || !data?.token) {
         setToken(null);
+        setIsTokenReady(false);
         return;
       }
 
       setToken(data.token);
+      setIsTokenReady(true);
     }
 
     void syncToken();
@@ -128,13 +133,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userId,
       user,
       isLoading: isPending,
+      isTokenReady,
       error,
       login,
       signup,
       logout,
       refreshSession,
     }),
-    [isAuthenticated, userId, user, isPending, error]
+    [isAuthenticated, userId, user, isPending, isTokenReady, error]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

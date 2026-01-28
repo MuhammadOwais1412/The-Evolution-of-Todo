@@ -52,3 +52,21 @@ htmlcov/
 # Database
 *.db
 *.sqlite
+
+# Scripts and docs specific to Phase-2-web-todo
+scripts/
+docs/
+*.md
+*.txt
+*.pdf
+*.doc
+*.docx
+
+# Backup and temporary files
+*~
+*.bak
+*.backup
+*.tmp
+*.temp
+*.old
+*.orig
