@@ -52,7 +52,6 @@ htmlcov/
 # Database
 *.db
 *.sqlite
-<<<<<<< HEAD
 
 # Scripts and docs specific to Phase-2-web-todo
 scripts/
@@ -71,5 +70,3 @@ docs/
 *.temp
 *.old
 *.orig
-=======
->>>>>>> 003-frontend-better-auth

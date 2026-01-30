@@ -1,26 +1,17 @@
 "use client";
 
-<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react";
-=======
-import { useState } from "react";
->>>>>>> 003-frontend-better-auth
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
-<<<<<<< HEAD
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
-=======
-  const { login, isLoading: authLoading } = useAuth();
->>>>>>> 003-frontend-better-auth
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-<<<<<<< HEAD
   const [showForm, setShowForm] = useState(false);
   const hasRedirected = useRef(false);
 
@@ -42,8 +33,6 @@ export default function LoginPage() {
       </div>
     );
   }
-=======
->>>>>>> 003-frontend-better-auth
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -123,11 +112,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
-<<<<<<< HEAD
-          Don{"'"}t have an account?{" "}
-=======
           Don't have an account?{" "}
->>>>>>> 003-frontend-better-auth
           <Link href="/signup" className="text-blue-600 hover:text-blue-700 hover:underline">
             Sign up
           </Link>

@@ -5,12 +5,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 // Store JWT token from Better Auth
 let jwtToken: string | null = null;
 
-<<<<<<< HEAD
 // Track in-flight requests to prevent duplicates
 const inflightRequests = new Map<string, Promise<unknown>>(); // Store as unknown to satisfy TS, cast when returning
 
-=======
->>>>>>> 003-frontend-better-auth
 /**
  * Set JWT token for API requests
  */
@@ -26,7 +23,6 @@ export function getToken(): string | null {
 }
 
 /**
-<<<<<<< HEAD
  * Generate a unique request key for deduplication
  */
 function getRequestKey(endpoint: string, method: string): string {
@@ -34,15 +30,12 @@ function getRequestKey(endpoint: string, method: string): string {
 }
 
 /**
-=======
->>>>>>> 003-frontend-better-auth
  * Fetch wrapper that injects JWT token and handles errors
  */
 async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-<<<<<<< HEAD
   const method = options.method?.toUpperCase() || 'GET';
   const requestKey = getRequestKey(endpoint, method);
 
@@ -52,8 +45,6 @@ async function apiFetch<T>(
     return inflightRequests.get(requestKey)! as Promise<T>; // Cast to expected return type
   }
 
-=======
->>>>>>> 003-frontend-better-auth
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...options.headers,
@@ -64,7 +55,6 @@ async function apiFetch<T>(
     (headers as Record<string, string>)["Authorization"] = `Bearer ${jwtToken}`;
   }
 
-<<<<<<< HEAD
   // Add timeout (increase to 10 seconds to reduce timeout errors)
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // Increased from 5 to 10 seconds
@@ -176,80 +166,6 @@ async function apiFetch<T>(
   inflightRequests.set(requestKey, requestPromise);
 
   return requestPromise;
-=======
-  // Add timeout (5 seconds)
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-  options.signal = controller.signal;
-
-  try {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      // Handle 401 Unauthorized - redirect to login
-      if (response.status === 401) {
-        jwtToken = null;
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        throw new Error("Unauthorized - please log in again");
-      }
-
-      // Handle 404 Not Found
-      if (response.status === 404) {
-        const error: ErrorResponse = await response.json().catch(() => ({
-          error: "Not found",
-          message: "Resource not found",
-        }));
-        throw new Error(error.message || "Resource not found");
-      }
-
-      // Handle 422 Validation Error
-      if (response.status === 422) {
-        const error: ErrorResponse = await response.json().catch(() => ({
-          error: "Validation error",
-          message: "Invalid input",
-        }));
-        throw new Error(error.message || "Validation failed");
-      }
-
-      // Handle 5xx Server Errors
-      if (response.status >= 500) {
-        throw new Error("Server error - please try again later");
-      }
-
-      // Other errors
-      const error: ErrorResponse = await response.json().catch(() => ({
-        error: "Unknown error",
-        message: "API request failed",
-      }));
-      throw new Error(error.message || "API request failed");
-    }
-
-    // Handle 204 No Content (DELETE)
-    if (response.status === 204) {
-      return undefined as T;
-    }
-
-    return response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
-
-    if (error instanceof Error) {
-      if (error.name === "AbortError") {
-        throw new Error("Request timeout - please check your connection");
-      }
-      throw error;
-    }
-    throw new Error("An unexpected error occurred");
-  }
->>>>>>> 003-frontend-better-auth
 }
 
 /**
@@ -302,7 +218,6 @@ export async function updateTask(
 
 /**
  * Delete a task
-<<<<<<< HEAD
  * This function handles 404 errors gracefully after successful deletes (idempotent behavior)
  */
 export async function deleteTask(userId: string, taskId: number): Promise<void> {
@@ -321,13 +236,6 @@ export async function deleteTask(userId: string, taskId: number): Promise<void> 
     // Re-throw other errors
     throw error;
   }
-=======
- */
-export async function deleteTask(userId: string, taskId: number): Promise<void> {
-  return apiFetch(`/${userId}/tasks/${taskId}`, {
-    method: "DELETE",
-  });
->>>>>>> 003-frontend-better-auth
 }
 
 /**

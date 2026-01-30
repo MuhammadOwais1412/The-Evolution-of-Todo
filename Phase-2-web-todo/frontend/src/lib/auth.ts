@@ -1,16 +1,11 @@
 import { betterAuth } from "better-auth";
-<<<<<<< HEAD
 import { Pool } from "pg";
-=======
-import { memoryAdapter } from "better-auth/adapters/memory";
->>>>>>> 003-frontend-better-auth
 import { jwt } from "better-auth/plugins";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || "change-me-in-production",
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
 
-<<<<<<< HEAD
   // PostgreSQL database connection using direct Pool connection
   database: new Pool({
     connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL,
@@ -55,10 +50,6 @@ export const auth = betterAuth({
       updatedAt: "updatedAt"
     }
   },
-=======
-  // Dev-only persistence. Replace with a real adapter before production.
-  database: memoryAdapter({}),
->>>>>>> 003-frontend-better-auth
 
   emailAndPassword: {
     enabled: true,

@@ -1,28 +1,19 @@
 "use client";
 
-<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react";
-=======
-import { useState } from "react";
->>>>>>> 003-frontend-better-auth
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 
 export default function SignupPage() {
   const router = useRouter();
-<<<<<<< HEAD
   const { signup, isAuthenticated, isLoading: authLoading } = useAuth();
-=======
-  const { signup, isLoading: authLoading } = useAuth();
->>>>>>> 003-frontend-better-auth
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-<<<<<<< HEAD
   const [showForm, setShowForm] = useState(false);
   const hasRedirected = useRef(false);
 
@@ -44,8 +35,6 @@ export default function SignupPage() {
       </div>
     );
   }
-=======
->>>>>>> 003-frontend-better-auth
 
   function validateForm(): boolean {
     // Name validation

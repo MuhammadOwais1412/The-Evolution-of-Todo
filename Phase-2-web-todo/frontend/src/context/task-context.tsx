@@ -21,30 +21,19 @@ interface TaskContextType {
   updateTask: (taskId: number, taskData: TaskUpdate) => Promise<Task>;
   deleteTask: (taskId: number) => Promise<void>;
   toggleCompletion: (taskId: number) => Promise<Task>;
-<<<<<<< HEAD
   isTaskToggling: (taskId: number) => boolean;  // Check if a task is currently being toggled
-=======
->>>>>>> 003-frontend-better-auth
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export function TaskProvider({ children }: { children: ReactNode }) {
-<<<<<<< HEAD
   const { userId, isAuthenticated, isTokenReady } = useAuth();
-=======
-  const { userId, isAuthenticated } = useAuth();
->>>>>>> 003-frontend-better-auth
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadTasks = async () => {
-<<<<<<< HEAD
     if (!userId || !isAuthenticated || !isTokenReady) {
-=======
-    if (!userId || !isAuthenticated) {
->>>>>>> 003-frontend-better-auth
       setTasks([]);
       return;
     }
@@ -56,7 +45,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       setTasks(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load tasks";
-<<<<<<< HEAD
 
       // Handle unauthorized error specifically
       if (message.includes("Unauthorized") || message.includes("401")) {
@@ -65,8 +53,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-=======
->>>>>>> 003-frontend-better-auth
       setError(message);
       setTasks([]);
     } finally {
@@ -80,13 +66,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   };
 
   const createTaskFunc = async (taskData: TaskCreate): Promise<Task> => {
-<<<<<<< HEAD
     if (!userId || !isAuthenticated || !isTokenReady) {
       throw new Error("User not authenticated or token not ready");
-=======
-    if (!userId) {
-      throw new Error("User not authenticated");
->>>>>>> 003-frontend-better-auth
     }
 
     try {
@@ -96,7 +77,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       return newTask;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create task";
-<<<<<<< HEAD
 
       // Handle unauthorized error specifically
       if (message.includes("Unauthorized") || message.includes("401")) {
@@ -104,21 +84,14 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         throw err;
       }
 
-=======
->>>>>>> 003-frontend-better-auth
       setError(message);
       throw err;
     }
   };
 
   const updateTaskFunc = async (taskId: number, taskData: TaskUpdate): Promise<Task> => {
-<<<<<<< HEAD
     if (!userId || !isAuthenticated || !isTokenReady) {
       throw new Error("User not authenticated or token not ready");
-=======
-    if (!userId) {
-      throw new Error("User not authenticated");
->>>>>>> 003-frontend-better-auth
     }
 
     try {
@@ -128,7 +101,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       return updatedTask;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to update task";
-<<<<<<< HEAD
 
       // Handle unauthorized error specifically
       if (message.includes("Unauthorized") || message.includes("401")) {
@@ -136,21 +108,14 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         throw err;
       }
 
-=======
->>>>>>> 003-frontend-better-auth
       setError(message);
       throw err;
     }
   };
 
   const deleteTaskFunc = async (taskId: number): Promise<void> => {
-<<<<<<< HEAD
     if (!userId || !isAuthenticated || !isTokenReady) {
       throw new Error("User not authenticated or token not ready");
-=======
-    if (!userId) {
-      throw new Error("User not authenticated");
->>>>>>> 003-frontend-better-auth
     }
 
     try {
@@ -159,7 +124,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       setTasks(prev => prev.filter(t => t.id !== taskId));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to delete task";
-<<<<<<< HEAD
 
       // Handle unauthorized error specifically
       if (message.includes("Unauthorized") || message.includes("401")) {
@@ -167,14 +131,11 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         throw err;
       }
 
-=======
->>>>>>> 003-frontend-better-auth
       setError(message);
       throw err;
     }
   };
 
-<<<<<<< HEAD
   // Track tasks currently being toggled to prevent multiple simultaneous toggles
   const [togglingTasks, setTogglingTasks] = useState<Set<number>>(new Set());
 
@@ -241,37 +202,11 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   // Reload tasks when userId, isAuthenticated, or isTokenReady changes
   useEffect(() => {
     if (userId && isAuthenticated && isTokenReady) {
-=======
-  const toggleCompletionFunc = async (taskId: number): Promise<Task> => {
-    if (!userId) {
-      throw new Error("User not authenticated");
-    }
-
-    try {
-      setError(null);
-      const updatedTask = await toggleCompletion(userId, taskId);
-      setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
-      return updatedTask;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to toggle task completion";
-      setError(message);
-      throw err;
-    }
-  };
-
-  // Reload tasks when userId changes
-  useEffect(() => {
-    if (userId && isAuthenticated) {
->>>>>>> 003-frontend-better-auth
       void loadTasks();
     } else {
       setTasks([]);
     }
-<<<<<<< HEAD
   }, [userId, isAuthenticated, isTokenReady]);
-=======
-  }, [userId, isAuthenticated]);
->>>>>>> 003-frontend-better-auth
 
   const value = useMemo(() => ({
     tasks,
@@ -282,14 +217,9 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     updateTask: updateTaskFunc,
     deleteTask: deleteTaskFunc,
     toggleCompletion: toggleCompletionFunc,
-<<<<<<< HEAD
     isTaskToggling: (taskId: number) => togglingTasks.has(taskId),
     retryLoadTasks,
   }), [tasks, isLoading, error, togglingTasks]);
-=======
-    retryLoadTasks,
-  }), [tasks, isLoading, error]);
->>>>>>> 003-frontend-better-auth
 
   return (
     <TaskContext.Provider value={value}>

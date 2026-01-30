@@ -3,10 +3,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
-<<<<<<< HEAD
 import httpx
-=======
->>>>>>> 003-frontend-better-auth
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db import get_session
@@ -18,7 +15,6 @@ settings = get_settings()
 security = HTTPBearer(auto_error=False)
 
 
-<<<<<<< HEAD
 async def get_jwks():
     """
     Fetch JWKS (JSON Web Key Set) from Better Auth.
@@ -161,11 +157,6 @@ def verify_eddsa_token(token: str, public_key):
 async def verify_jwt(token: str) -> dict:
     """
     Verify and decode a JWT token from Better Auth using JWKS.
-=======
-async def verify_jwt(token: str) -> dict:
-    """
-    Verify and decode a JWT token from Better Auth.
->>>>>>> 003-frontend-better-auth
 
     Args:
         token: The JWT token string
@@ -174,7 +165,6 @@ async def verify_jwt(token: str) -> dict:
         Decoded token payload with 'sub' claim containing user_id
 
     Raises:
-<<<<<<< HEAD
         HTTPException: If token is invalid, expired, or signature verification fails
     """
     try:
@@ -221,17 +211,6 @@ async def verify_jwt(token: str) -> dict:
                 options={"verify_exp": True}
             )
 
-=======
-        HTTPException: If token is invalid or expired
-    """
-    try:
-        payload = jwt.decode(
-            token,
-            settings.better_auth_secret,
-            algorithms=["HS256"],
-            options={"verify_exp": True}
-        )
->>>>>>> 003-frontend-better-auth
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -245,15 +224,12 @@ async def verify_jwt(token: str) -> dict:
             detail=f"Invalid token: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
-<<<<<<< HEAD
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
-=======
->>>>>>> 003-frontend-better-auth
 
 
 async def get_current_user(

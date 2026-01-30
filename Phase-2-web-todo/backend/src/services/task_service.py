@@ -133,10 +133,7 @@ class TaskService:
     ) -> bool:
         """
         Delete a task with user isolation.
-<<<<<<< HEAD
         This operation is idempotent - deleting an already deleted task returns True.
-=======
->>>>>>> 003-frontend-better-auth
 
         Args:
             session: Database session
@@ -144,7 +141,6 @@ class TaskService:
             user_id: Owner user ID from JWT
 
         Returns:
-<<<<<<< HEAD
             True if deletion was successful or task was already deleted, False if task doesn't belong to user
         """
         task = await TaskService.get_task_by_id(session, task_id, user_id)
@@ -161,13 +157,6 @@ class TaskService:
                 return False
             # Task doesn't exist at all or was already deleted - return True for idempotency
             return True
-=======
-            True if deleted, False if not found
-        """
-        task = await TaskService.get_task_by_id(session, task_id, user_id)
-        if task is None:
-            return False
->>>>>>> 003-frontend-better-auth
 
         await session.delete(task)
         await session.commit()
