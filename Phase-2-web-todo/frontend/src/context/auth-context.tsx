@@ -37,7 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshSession = async () => {
     setError(null);
+    console.log('Refreshing session...', {
+      timestamp: new Date().toISOString()
+    });
     await refetch();
+    console.log('Session refresh completed', {
+      hasSession: !!session?.user,
+      timestamp: new Date().toISOString()
+    });
   };
 
   // Keep API client JWT in sync with auth state.
@@ -45,7 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function syncToken() {
+      console.log('Syncing token with API client:', {
+        hasUser: !!session?.user,
+        sessionId: session?.sessionId,
+        timestamp: new Date().toISOString()
+      });
+
       if (!session?.user) {
+        console.log('No user session, clearing token');
         setToken(null);
         setIsTokenReady(false);
         return;
@@ -54,7 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error: tokenError } = await authClient.token();
       if (cancelled) return;
 
+      console.log('Token sync response:', {
+        hasData: !!data?.token,
+        hasError: !!tokenError,
+        error: tokenError,
+        timestamp: new Date().toISOString()
+      });
+
       if (tokenError || !data?.token) {
+        console.error('Token sync failed:', tokenError);
         setToken(null);
         setIsTokenReady(false);
         return;
@@ -62,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setToken(data.token);
       setIsTokenReady(true);
+      console.log('Token sync completed successfully');
     }
 
     void syncToken();
@@ -84,19 +107,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     setError(null);
 
+    // Log login request details
+    console.log('Auth client signIn request:', {
+      method: 'signIn.email',
+      email,
+      timestamp: new Date().toISOString()
+    });
+
     const { error: signInError } = await authClient.signIn.email({
       email,
       password,
       rememberMe: true,
     });
 
+    // Log response details
+    console.log('Auth client signIn response:', {
+      hasError: !!signInError,
+      error: signInError,
+      timestamp: new Date().toISOString()
+    });
+
     if (signInError) {
       const message = signInError.message || "Login failed";
       setError(message);
+      console.error('Sign in error occurred:', signInError);
       throw new Error(message);
     }
 
+    console.log('Sign in successful, refreshing session...');
     await refreshSession();
+    console.log('Session refreshed successfully');
   };
 
   const signup = async (email: string, password: string, name?: string) => {

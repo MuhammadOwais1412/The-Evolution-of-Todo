@@ -39,12 +39,29 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
+    // Log login attempt
+    console.log('Login attempt started', {
+      email,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    });
+
     try {
+      // Call login function and log the process
+      console.log('Calling auth.login function...');
       await login(email, password);
+
+      // Log successful login
+      console.log('Login successful, redirecting to /tasks');
+
       // Redirect to tasks dashboard after successful login
       router.push("/tasks");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      // Log error details
+      console.error('Login failed:', err);
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
+      console.error('Error message:', errorMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

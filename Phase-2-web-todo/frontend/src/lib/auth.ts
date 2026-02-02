@@ -3,8 +3,14 @@ import { Pool } from "pg";
 import { jwt } from "better-auth/plugins";
 
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET || "change-me-in-production",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET || (() => {
+    console.error('BETTER_AUTH_SECRET is not set in environment variables');
+    throw new Error('BETTER_AUTH_SECRET is required in production');
+  })(),
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL || (() => {
+    console.error('BETTER_AUTH_URL or NEXT_PUBLIC_BETTER_AUTH_URL is not set in environment variables');
+    throw new Error('BETTER_AUTH_URL is required in production');
+  })(),
 
   // PostgreSQL database connection using direct Pool connection
   database: new Pool({
