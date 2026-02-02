@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function syncToken() {
       console.log('Syncing token with API client:', {
         hasUser: !!session?.user,
-        sessionId: session?.sessionId,
+        sessionId: session?.session?.id,
         timestamp: new Date().toISOString()
       });
 
