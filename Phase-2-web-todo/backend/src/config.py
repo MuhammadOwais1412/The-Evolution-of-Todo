@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     # JWT secret for Better Auth token verification
     better_auth_secret: str = Field(..., alias="BETTER_AUTH_SECRET")
 
-    # Better Auth base URL for fetching JWKS
-    better_auth_base_url: str = Field(default="http://localhost:3000", alias="BETTER_AUTH_BASE_URL")
+    # Better Auth base URL for fetching JWKS (required in production)
+    better_auth_base_url: str = Field(default="", alias="BETTER_AUTH_URL")
 
     # API server configuration
     api_host: str = "localhost"

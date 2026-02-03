@@ -19,7 +19,10 @@ export default function LoginPage() {
   useEffect(() => {
     if (!authLoading && isAuthenticated && !hasRedirected.current) {
       hasRedirected.current = true;
-      router.push("/tasks");
+      // Add a small delay to ensure state is properly synced before redirect
+      setTimeout(() => {
+        router.push("/tasks");
+      }, 100);
     } else if (!authLoading && !isAuthenticated) {
       setShowForm(true);
     }

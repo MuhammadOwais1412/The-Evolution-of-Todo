@@ -74,7 +74,9 @@ async function apiFetch<T>(
       if (!response.ok) {
         // Handle 401 Unauthorized - don't redirect here to avoid loops, let the component handle it
         if (response.status === 401) {
+          // Clear the token to ensure we don't keep trying with an invalid one
           jwtToken = null;
+          setToken(null);
 
           // Try to get error details from response
           let errorMessage = "Unauthorized - please log in again";

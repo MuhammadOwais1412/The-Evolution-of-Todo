@@ -25,7 +25,7 @@ export default function TasksPage() {
   }, [authLoading, isAuthenticated, router]);
 
   // Show loading state while checking authentication or synchronizing token
-  if (authLoading || (isAuthenticated && !isTokenReady)) {
+  if (authLoading || !isTokenReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-xl">Loading...</div>

@@ -52,39 +52,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function syncToken() {
-      console.log('Syncing token with API client:', {
-        hasUser: !!session?.user,
-        sessionId: session?.session?.id,
-        timestamp: new Date().toISOString()
-      });
-
+      // Only sync token if we have a user session
       if (!session?.user) {
-        console.log('No user session, clearing token');
         setToken(null);
         setIsTokenReady(false);
         return;
       }
 
-      const { data, error: tokenError } = await authClient.token();
-      if (cancelled) return;
+      try {
+        const { data, error: tokenError } = await authClient.token();
 
-      console.log('Token sync response:', {
-        hasData: !!data?.token,
-        hasError: !!tokenError,
-        error: tokenError,
-        timestamp: new Date().toISOString()
-      });
+        if (cancelled) return;
 
-      if (tokenError || !data?.token) {
-        console.error('Token sync failed:', tokenError);
+        if (tokenError || !data?.token) {
+          console.error('Token sync failed:', tokenError);
+          setToken(null);
+          setIsTokenReady(false);
+          return;
+        }
+
+        setToken(data.token);
+        setIsTokenReady(true);
+      } catch (error) {
+        console.error('Unexpected error during token sync:', error);
         setToken(null);
         setIsTokenReady(false);
-        return;
       }
-
-      setToken(data.token);
-      setIsTokenReady(true);
-      console.log('Token sync completed successfully');
     }
 
     void syncToken();

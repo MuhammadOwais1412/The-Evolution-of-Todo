@@ -12,6 +12,9 @@ export const auth = betterAuth({
     throw new Error('BETTER_AUTH_URL is required in production');
   })(),
 
+  // Enable trustHost to handle serverless environments properly
+  trustHost: true,
+
   // PostgreSQL database connection using direct Pool connection
   database: new Pool({
     connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL,
