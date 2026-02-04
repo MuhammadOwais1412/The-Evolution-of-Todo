@@ -3,13 +3,19 @@ import { Pool } from "pg";
 import { jwt } from "better-auth/plugins";
 
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET || (() => {
-    console.error('BETTER_AUTH_SECRET is not set in environment variables');
-    throw new Error('BETTER_AUTH_SECRET is required in production');
+  secret: (() => {
+    if (!process.env.BETTER_AUTH_SECRET) {
+      console.error('BETTER_AUTH_SECRET is not set in environment variables');
+      throw new Error('BETTER_AUTH_SECRET is required in production');
+    }
+    return process.env.BETTER_AUTH_SECRET;
   })(),
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL || (() => {
-    console.error('BETTER_AUTH_URL or NEXT_PUBLIC_BETTER_AUTH_URL is not set in environment variables');
-    throw new Error('BETTER_AUTH_URL is required in production');
+  baseURL: (() => {
+    if (!process.env.NEXT_PUBLIC_BETTER_AUTH_URL && !process.env.BETTER_AUTH_URL) {
+      console.error('BETTER_AUTH_URL or NEXT_PUBLIC_BETTER_AUTH_URL is not set in environment variables');
+      throw new Error('BETTER_AUTH_URL is required in production');
+    }
+    return process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL;
   })(),
 
   // Enable trustHost to handle serverless environments properly

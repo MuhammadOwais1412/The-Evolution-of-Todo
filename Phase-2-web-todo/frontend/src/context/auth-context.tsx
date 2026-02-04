@@ -60,6 +60,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
+        // Add a small delay to ensure session is fully established
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const { data, error: tokenError } = await authClient.token();
 
         if (cancelled) return;

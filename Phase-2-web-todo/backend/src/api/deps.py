@@ -22,6 +22,13 @@ async def get_jwks():
     Returns:
         Dictionary containing the JWKS
     """
+    # Validate that better_auth_base_url is configured in production
+    if not settings.better_auth_base_url:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="BETTER_AUTH_URL is not configured. Please set the BETTER_AUTH_URL environment variable."
+        )
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{settings.better_auth_base_url.rstrip('/')}/api/auth/jwks", timeout=10)

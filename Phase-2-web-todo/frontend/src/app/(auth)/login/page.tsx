@@ -22,7 +22,7 @@ export default function LoginPage() {
       // Add a small delay to ensure state is properly synced before redirect
       setTimeout(() => {
         router.push("/tasks");
-      }, 100);
+      }, 300); // Increased delay to ensure proper token sync
     } else if (!authLoading && !isAuthenticated) {
       setShowForm(true);
     }

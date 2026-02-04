@@ -24,18 +24,33 @@ export default function TasksPage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
+  // Redirect if not authenticated - moved to useEffect to avoid state update during render
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      // Add a small delay before redirect to prevent rapid flickering
+      const timer = setTimeout(() => {
+        router.push("/login");
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [authLoading, isAuthenticated, router]);
+
   // Show loading state while checking authentication or synchronizing token
   if (authLoading || !isTokenReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-xl">Loading...</div>
+        <div className="text-xl">Loading authentication...</div>
       </div>
     );
   }
 
   // Redirect if not authenticated (after useEffect has run)
   if (!isAuthenticated) {
-    return null; // Render nothing while redirecting
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl">Redirecting to login...</div>
+      </div>
+    );
   }
 
   async function handleCreateTask(title: string, description: string) {

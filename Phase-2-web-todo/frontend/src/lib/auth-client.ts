@@ -9,8 +9,13 @@ const getBaseURL = (): string => {
   }
 
   if (typeof window !== 'undefined') {
-    // Fallback to current origin only if environment variable is not set
-    return window.location.origin;
+    // For client-side, fallback to current origin only if environment variable is not set
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return "http://localhost:3000";
+    } else {
+      // In production environments, throw an error if NEXT_PUBLIC_BETTER_AUTH_URL is not set
+      throw new Error('NEXT_PUBLIC_BETTER_AUTH_URL is required in production');
+    }
   }
 
   // On server, use environment variable or throw error in production

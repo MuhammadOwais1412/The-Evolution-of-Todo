@@ -1,6 +1,18 @@
 import type { Task, TaskCreate, TaskUpdate, ErrorResponse } from "@/types/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (() => {
+  // In production, throw an error if the API URL is not set
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    throw new Error('NEXT_PUBLIC_API_URL is not set in environment variables. Please configure it in your deployment.');
+  }
+  // For local development, fallback to localhost
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return "http://localhost:8000";
+  } else {
+    // In production environments, throw an error if NEXT_PUBLIC_API_URL is not set
+    throw new Error('NEXT_PUBLIC_API_URL is not set in environment variables. Please configure it in your deployment.');
+  }
+})();
 
 // Store JWT token from Better Auth
 let jwtToken: string | null = null;
@@ -176,6 +188,7 @@ async function apiFetch<T>(
 export async function getHealth(): Promise<{ status: string }> {
   return apiFetch("/health");
 }
+
 
 /**
  * Create a new task
