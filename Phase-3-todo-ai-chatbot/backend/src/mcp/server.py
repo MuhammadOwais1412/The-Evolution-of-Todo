@@ -95,3 +95,60 @@ async def handle_update_task(user_id: str, task_id: int, title: str = None, desc
             message=f"Error processing update_task: {str(e)}"
         )
         return error_response.dict()
+
+# Register the complete_task function as an MCP tool
+@server.register_tool(
+    name="complete_task",
+    description="Mark a task as complete or incomplete for the authenticated user",
+    parameters={
+        "type": "object",
+        "properties": {
+            "user_id": {"type": "string"},
+            "task_id": {"type": "integer"},
+            "completed": {"type": "boolean"}
+        },
+        "required": ["user_id", "task_id", "completed"]
+    }
+)
+async def handle_complete_task(user_id: str, task_id: int, completed: bool) -> Any:
+    """
+    Handler for the complete_task MCP tool
+    """
+    try:
+        result = await complete_task(user_id, task_id, completed)
+        return result
+    except Exception as e:
+        logger.error(f"Error in complete_task handler: {str(e)}")
+        error_response = ErrorResponse(
+            error_code="HANDLER_ERROR",
+            message=f"Error processing complete_task: {str(e)}"
+        )
+        return error_response.dict()
+
+# Register the delete_task function as an MCP tool
+@server.register_tool(
+    name="delete_task",
+    description="Remove a task for the authenticated user",
+    parameters={
+        "type": "object",
+        "properties": {
+            "user_id": {"type": "string"},
+            "task_id": {"type": "integer"}
+        },
+        "required": ["user_id", "task_id"]
+    }
+)
+async def handle_delete_task(user_id: str, task_id: int) -> Any:
+    """
+    Handler for the delete_task MCP tool
+    """
+    try:
+        result = await delete_task(user_id, task_id)
+        return result
+    except Exception as e:
+        logger.error(f"Error in delete_task handler: {str(e)}")
+        error_response = ErrorResponse(
+            error_code="HANDLER_ERROR",
+            message=f"Error processing delete_task: {str(e)}"
+        )
+        return error_response.dict()
