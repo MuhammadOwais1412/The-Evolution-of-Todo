@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlmodel import SQLModel
 
 from src.config import get_settings
+# Import all models to register them with SQLModel metadata
+from src.models import *  # noqa: F401, F403
 
 settings = get_settings()
 

@@ -8,18 +8,18 @@
 ## Phase 1: Project Setup & Dependencies
 
 - [x] T001 Create directory structure for AI agent components in Phase-3-todo-ai-chatbot/backend/src/ai/
-- [ ] T002 [P] Install OpenAI SDK and Google Gemini dependencies in backend
+- [x] T002 [P] Install OpenAI SDK and Google Gemini dependencies in backend
 - [x] T003 [P] Update environment variables in .env with GEMINI_API_KEY and OPENAI_BASE_URL
 - [x] T004 [P] Create configuration module for AI provider settings in Phase-3-todo-ai-chatbot/backend/src/config/ai_config.py
-- [ ] T005 Update pyproject.toml with new AI-related dependencies
+- [x] T005 Update pyproject.toml with new AI-related dependencies
 
 ## Phase 2: Foundational Components
 
-- [ ] T006 Create ToolCallLog SQLModel in Phase-3-todo-ai-chatbot/backend/src/models/tool_call_log.py
-- [ ] T007 [P] Implement database migration for tool_call_logs table
-- [ ] T008 [P] Create Pydantic schemas for AI request/response in Phase-3-todo-ai-chatbot/backend/src/schemas/ai_schemas.py
-- [ ] T009 Implement utility functions for JWT validation from Better Auth in Phase-3-todo-ai-chatbot/backend/src/utils/auth_utils.py
-- [ ] T010 Create base exception classes for AI agent in Phase-3-todo-ai-chatbot/backend/src/exceptions/ai_exceptions.py
+- [x] T006 Create ToolCallLog SQLModel in Phase-3-todo-ai-chatbot/backend/src/models/tool_call_log.py
+- [x] T007 [P] Implement database migration for tool_call_logs table
+- [x] T008 [P] Create Pydantic schemas for AI request/response in Phase-3-todo-ai-chatbot/backend/src/schemas/ai_schemas.py
+- [x] T009 Implement utility functions for JWT validation from Better Auth in Phase-3-todo-ai-chatbot/backend/src/utils/auth_utils.py
+- [x] T010 Create base exception classes for AI agent in Phase-3-todo-ai-chatbot/backend/src/exceptions/ai_exceptions.py
 
 ## Phase 3: [US1] Core AI Agent Service
 
@@ -27,8 +27,8 @@
 
 **Independent Test Criteria**: The AI agent service can receive a natural language command and determine which MCP tool to call without errors.
 
-- [ ] T011 [US1] Create AI agent service class in Phase-3-todo-ai-chatbot/backend/src/ai/agent_service.py
-- [ ] T012 [P] [US1] Implement Google Gemini client initialization in Phase-3-todo-ai-chatbot/backend/src/ai/gemini_client.py
+- [x] T011 [US1] Create AI agent service class in Phase-3-todo-ai-chatbot/backend/src/ai/agent_service.py
+- [x] T012 [P] [US1] Implement Google Gemini client initialization in Phase-3-todo-ai-chatbot/backend/src/ai/gemini_client.py
 - [ ] T013 [P] [US1] Create MCP tool adapter functions in Phase-3-todo-ai-chatbot/backend/src/ai/mcp_adapters.py
 - [ ] T014 [US1] Implement tool definitions for OpenAI Assistant API that map to MCP tools
 - [ ] T015 [US1] Create natural language processing function that determines appropriate MCP tool
