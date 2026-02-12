@@ -1,0 +1,313 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Conversation History API",
+    "description": "API endpoint for retrieving conversation message history",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/{user_id}/conversations/{conversation_id}/messages": {
+      "get": {
+        "summary": "Get conversation messages",
+        "description": "Retrieve messages for a specific conversation in chronological order with pagination support",
+        "operationId": "getConversationMessages",
+        "tags": ["Chat"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the authenticated user",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the conversation",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of messages to retrieve",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of messages to skip (for pagination)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationHistoryResponse"
+                },
+                "examples": {
+                  "withMessages": {
+                    "summary": "Conversation with messages",
+                    "value": {
+                      "success": true,
+                      "messages": [
+                        {
+                          "message_id": "660e8400-e29b-41d4-a716-446655440001",
+                          "role": "user",
+                          "content": "Add a task to buy groceries tomorrow",
+                          "timestamp": "2026-02-12T12:00:00Z"
+                        },
+                        {
+                          "message_id": "660e8400-e29b-41d4-a716-446655440002",
+                          "role": "assistant",
+                          "content": "I've added a task to buy groceries with a due date of tomorrow.",
+                          "timestamp": "2026-02-12T12:00:01Z"
+                        },
+                        {
+                          "message_id": "660e8400-e29b-41d4-a716-446655440003",
+                          "role": "user",
+                          "content": "Show me all my tasks",
+                          "timestamp": "2026-02-12T12:01:00Z"
+                        },
+                        {
+                          "message_id": "660e8400-e29b-41d4-a716-446655440004",
+                          "role": "assistant",
+                          "content": "Here are your tasks:\n1. Buy groceries (due tomorrow)\n2. Finish project report (due next week)",
+                          "timestamp": "2026-02-12T12:01:02Z"
+                        }
+                      ],
+                      "total_count": 4,
+                      "has_more": false
+                    }
+                  },
+                  "withPagination": {
+                    "summary": "Paginated response",
+                    "value": {
+                      "success": true,
+                      "messages": [
+                        {
+                          "message_id": "660e8400-e29b-41d4-a716-446655440051",
+                          "role": "user",
+                          "content": "Mark the first task as complete",
+                          "timestamp": "2026-02-12T13:00:00Z"
+                        },
+                        {
+                          "message_id": "660e8400-e29b-41d4-a716-446655440052",
+                          "role": "assistant",
+                          "content": "I've marked 'Buy groceries' as complete.",
+                          "timestamp": "2026-02-12T13:00:01Z"
+                        }
+                      ],
+                      "total_count": 102,
+                      "has_more": true
+                    }
+                  },
+                  "emptyConversation": {
+                    "summary": "Empty conversation",
+                    "value": {
+                      "success": true,
+                      "messages": [],
+                      "total_count": 0,
+                      "has_more": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "JWT token is invalid or expired",
+                  "error_code": "AUTH_FAILED",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "You do not have permission to access this conversation",
+                  "error_code": "UNAUTHORIZED",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Conversation not found",
+                  "error_code": "NOT_FOUND",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Service temporarily unavailable. Please try again later.",
+                  "error_code": "DATABASE_ERROR",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token from Better Auth"
+      }
+    },
+    "schemas": {
+      "ConversationHistoryResponse": {
+        "type": "object",
+        "required": ["success", "messages", "total_count", "has_more"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true],
+            "description": "Indicates successful retrieval"
+          },
+          "messages": {
+            "type": "array",
+            "description": "List of messages in chronological order",
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            }
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "Total number of messages in the conversation",
+            "example": 4
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "Whether there are more messages available (for pagination)",
+            "example": false
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "required": ["message_id", "role", "content", "timestamp"],
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the message",
+            "example": "660e8400-e29b-41d4-a716-446655440001"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "assistant"],
+            "description": "Who sent the message",
+            "example": "user"
+          },
+          "content": {
+            "type": "string",
+            "description": "The message content",
+            "example": "Add a task to buy groceries tomorrow"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the message was created",
+            "example": "2026-02-12T12:00:00Z"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["success", "error", "error_code", "timestamp"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [false],
+            "description": "Indicates failed retrieval"
+          },
+          "error": {
+            "type": "string",
+            "description": "User-friendly error message",
+            "example": "Conversation not found"
+          },
+          "error_code": {
+            "type": "string",
+            "enum": ["AUTH_FAILED", "UNAUTHORIZED", "NOT_FOUND", "DATABASE_ERROR"],
+            "description": "Machine-readable error code",
+            "example": "NOT_FOUND"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the error",
+            "example": "2026-02-12T12:00:00Z"
+          }
+        }
+      }
+    }
+  }
+}

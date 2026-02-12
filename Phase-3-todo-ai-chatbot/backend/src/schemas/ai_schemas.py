@@ -36,13 +36,16 @@ class AIChatRequest(BaseModel):
     """Schema for AI chat request."""
     message: str = Field(..., min_length=1, max_length=1000, description="Natural language command from user")
     context: Optional[dict] = Field(default=None, description="Additional context for the request")
+    requires_confirmation: bool = Field(default=True, description="Whether to require confirmation for destructive operations")
 
 
 class AIChatResponse(BaseModel):
     """Schema for AI chat response."""
-    status: str = Field(..., pattern=r"^(success|error)$", description="Response status")
-    data: dict = Field(..., description="Response data")
-    meta: dict = Field(default_factory=dict, description="Additional metadata")
+    response: str = Field(..., description="AI-generated response to user")
+    tool_calls: List[MCPToolCall] = Field(default_factory=list, description="Tool calls made by the AI agent")
+    requires_confirmation: bool = Field(default=False, description="Whether user confirmation is needed for any actions")
+    success: bool = Field(..., description="Whether the request was successful")
+    message: str = Field(..., description="Human-readable message about the result")
 
 
 class AIChatResponseData(BaseModel):
@@ -94,11 +97,9 @@ class AIHealthResponse(BaseModel):
     meta: Optional[dict] = Field(default=None, description="Additional metadata")
 
 
-class AIHealthData(BaseModel):
-    """Schema for the data portion of AI health response."""
+class HealthCheckResponse(BaseModel):
+    """Schema for health check response."""
+    status: str = Field(..., description="Overall health status")
     service: str = Field(..., description="Service name")
-    version: str = Field(..., description="Version of the AI agent service")
-    model: str = Field(..., description="Active AI model identifier")
-    connected_to_mcp: bool = Field(..., description="Whether MCP tools are accessible")
-    last_heartbeat: datetime = Field(..., description="ISO 8601 datetime of last health check")
-    tool_availability: Dict[str, bool] = Field(..., description="Availability of each tool")
+    timestamp: str = Field(..., description="ISO 8601 timestamp of the check")
+    checks: Dict[str, Any] = Field(..., description="Individual health checks")

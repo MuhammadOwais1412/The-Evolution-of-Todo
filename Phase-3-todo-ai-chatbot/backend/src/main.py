@@ -15,9 +15,15 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager for startup/shutdown events."""
     # Startup: Initialize database tables
     await init_db()
+
+    # Initialize AI agent service
+    from src.api.routes.ai_chat import _ai_agent_service_instance
+
     yield
-    # Shutdown: Clean up resources if needed
-    pass
+
+    # Shutdown: Clean up resources
+    if _ai_agent_service_instance is not None:
+        await _ai_agent_service_instance.shutdown()
 
 
 # Create FastAPI application
@@ -44,9 +50,13 @@ app.add_middleware(
 
 # Import and include routers
 from src.api.tasks import router as tasks_router
+from src.api.routes.ai_chat import router as ai_chat_router
 
 # Include task router
 app.include_router(tasks_router)
+
+# Include AI chat router
+app.include_router(ai_chat_router)
 
 
 @app.get("/")

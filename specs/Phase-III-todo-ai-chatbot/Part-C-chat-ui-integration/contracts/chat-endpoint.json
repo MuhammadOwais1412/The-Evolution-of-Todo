@@ -1,0 +1,355 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Chat Endpoint API",
+    "description": "API endpoint for sending messages to the AI agent and receiving responses",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/{user_id}/chat": {
+      "post": {
+        "summary": "Send a chat message",
+        "description": "Send a message to the AI agent and receive a response. The AI agent will process the message, select appropriate MCP tools, and return a response with any tool execution results.",
+        "operationId": "sendChatMessage",
+        "tags": ["Chat"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the authenticated user",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              },
+              "examples": {
+                "newConversation": {
+                  "summary": "Start a new conversation",
+                  "value": {
+                    "message": "Add a task to buy groceries tomorrow"
+                  }
+                },
+                "existingConversation": {
+                  "summary": "Continue existing conversation",
+                  "value": {
+                    "message": "Show me all my tasks",
+                    "conversation_id": "550e8400-e29b-41d4-a716-446655440000"
+                  }
+                },
+                "withConfirmation": {
+                  "summary": "Confirm a destructive operation",
+                  "value": {
+                    "message": "Yes, delete it",
+                    "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+                    "requires_confirmation": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatSuccessResponse"
+                },
+                "examples": {
+                  "taskAdded": {
+                    "summary": "Task successfully added",
+                    "value": {
+                      "success": true,
+                      "response": "I've added a task to buy groceries with a due date of tomorrow.",
+                      "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+                      "message_id": "660e8400-e29b-41d4-a716-446655440001",
+                      "tool_calls": [
+                        {
+                          "tool_name": "add_task",
+                          "status": "success",
+                          "result": {
+                            "task_id": "770e8400-e29b-41d4-a716-446655440002",
+                            "title": "buy groceries",
+                            "due_date": "2026-02-13"
+                          }
+                        }
+                      ],
+                      "requires_confirmation": false,
+                      "timestamp": "2026-02-12T12:00:00Z"
+                    }
+                  },
+                  "confirmationRequired": {
+                    "summary": "Confirmation required for destructive operation",
+                    "value": {
+                      "success": true,
+                      "response": "Are you sure you want to delete the task 'buy groceries'? This action cannot be undone.",
+                      "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+                      "message_id": "660e8400-e29b-41d4-a716-446655440003",
+                      "tool_calls": [],
+                      "requires_confirmation": true,
+                      "timestamp": "2026-02-12T12:01:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "JWT token is invalid or expired",
+                  "error_code": "AUTH_FAILED",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "User ID in URL does not match authenticated user",
+                  "error_code": "UNAUTHORIZED",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Too many requests. Please wait 30 seconds before trying again.",
+                  "error_code": "RATE_LIMIT",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Message exceeds maximum length of 1000 characters",
+                  "error_code": "INVALID_INPUT",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "AI processing error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "AI agent encountered an error processing your request",
+                  "error_code": "AI_ERROR",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Service temporarily unavailable. Please try again later.",
+                  "error_code": "DATABASE_ERROR",
+                  "timestamp": "2026-02-12T12:00:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token from Better Auth"
+      }
+    },
+    "schemas": {
+      "ChatRequest": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "description": "The user's message to the AI agent",
+            "example": "Add a task to buy groceries tomorrow"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional conversation ID to continue an existing conversation. If not provided, a new conversation will be created.",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "requires_confirmation": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set to true when confirming a destructive operation",
+            "example": false
+          }
+        }
+      },
+      "ChatSuccessResponse": {
+        "type": "object",
+        "required": ["success", "response", "conversation_id", "message_id", "tool_calls", "requires_confirmation", "timestamp"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true],
+            "description": "Indicates successful processing"
+          },
+          "response": {
+            "type": "string",
+            "description": "The AI agent's response message",
+            "example": "I've added a task to buy groceries with a due date of tomorrow."
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The conversation ID (new or existing)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "message_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the assistant's response message",
+            "example": "660e8400-e29b-41d4-a716-446655440001"
+          },
+          "tool_calls": {
+            "type": "array",
+            "description": "List of MCP tools that were executed",
+            "items": {
+              "$ref": "#/components/schemas/ToolCall"
+            }
+          },
+          "requires_confirmation": {
+            "type": "boolean",
+            "description": "Whether the user needs to confirm a destructive operation",
+            "example": false
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the response",
+            "example": "2026-02-12T12:00:00Z"
+          }
+        }
+      },
+      "ChatErrorResponse": {
+        "type": "object",
+        "required": ["success", "error", "error_code", "timestamp"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [false],
+            "description": "Indicates failed processing"
+          },
+          "error": {
+            "type": "string",
+            "description": "User-friendly error message",
+            "example": "JWT token is invalid or expired"
+          },
+          "error_code": {
+            "type": "string",
+            "enum": ["AUTH_FAILED", "UNAUTHORIZED", "RATE_LIMIT", "INVALID_INPUT", "AI_ERROR", "DATABASE_ERROR"],
+            "description": "Machine-readable error code",
+            "example": "AUTH_FAILED"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the error",
+            "example": "2026-02-12T12:00:00Z"
+          }
+        }
+      },
+      "ToolCall": {
+        "type": "object",
+        "required": ["tool_name", "status", "result"],
+        "properties": {
+          "tool_name": {
+            "type": "string",
+            "enum": ["add_task", "list_tasks", "update_task", "complete_task", "delete_task"],
+            "description": "The name of the MCP tool that was called",
+            "example": "add_task"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "error"],
+            "description": "The execution status of the tool call",
+            "example": "success"
+          },
+          "result": {
+            "type": "object",
+            "description": "The result returned by the tool (structure varies by tool)",
+            "example": {
+              "task_id": "770e8400-e29b-41d4-a716-446655440002",
+              "title": "buy groceries",
+              "due_date": "2026-02-13"
+            }
+          }
+        }
+      }
+    }
+  }
+}

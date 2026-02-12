@@ -1,6 +1,7 @@
 """AI agent service for processing natural language commands and mapping them to MCP tools."""
 import json
 import logging
+import asyncio
 from typing import Dict, Any, Optional, List
 from uuid import uuid4
 from datetime import datetime
@@ -20,6 +21,7 @@ from .mcp_adapters import MCPAdapters
 from .context_reconstructor import ContextReconstructor
 from .tool_orchestrator import ToolOrchestrator
 from .audit_logger import AuditLogger
+from .tool_definitions import get_mcp_tool_definitions
 
 
 logger = logging.getLogger(__name__)
@@ -44,106 +46,39 @@ class AIAgentService:
             # Define the tools available to the AI agent
             self.tools = self._define_available_tools()
 
+            # Shutdown flag
+            self._shutdown = False
+
         except Exception as e:
             logger.error(f"Failed to initialize AI agent service: {str(e)}")
             raise AIProcessingError(f"Failed to initialize AI agent service: {str(e)}")
 
+    async def shutdown(self):
+        """Gracefully shutdown the AI agent service and cleanup resources."""
+        logger.info("Shutting down AI agent service...")
+        self._shutdown = True
+
+        try:
+            # Close any open connections
+            if hasattr(self.client, 'close'):
+                await self.client.close()
+
+            # Cleanup any pending confirmations
+            if hasattr(self, 'confirmation_handler'):
+                await self.confirmation_handler.cleanup_expired_confirmations()
+
+            logger.info("AI agent service shutdown complete")
+
+        except Exception as e:
+            logger.error(f"Error during AI agent service shutdown: {str(e)}")
+
+    def is_shutdown(self) -> bool:
+        """Check if the service is in shutdown state."""
+        return self._shutdown
+
     def _define_available_tools(self) -> List[Dict[str, Any]]:
         """Define the tools available to the AI agent that map to MCP tools."""
-        return [
-            {
-                "type": "function",
-                "function": {
-                    "name": "add_task",
-                    "description": "Add a new task to the user's todo list",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "The ID of the user"},
-                            "title": {"type": "string", "description": "The title of the task"},
-                            "description": {"type": "string", "description": "The description of the task"},
-                            "priority": {
-                                "type": "string",
-                                "enum": ["low", "medium", "high"],
-                                "description": "Priority of the task, defaults to medium"
-                            }
-                        },
-                        "required": ["user_id", "title"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "list_tasks",
-                    "description": "List tasks for the user, optionally filtered by status",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "The ID of the user"},
-                            "status": {
-                                "type": "string",
-                                "enum": ["all", "pending", "completed"],
-                                "description": "Status filter for tasks, defaults to all"
-                            }
-                        },
-                        "required": ["user_id"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "update_task",
-                    "description": "Update an existing task for the user",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "The ID of the user"},
-                            "task_id": {"type": "integer", "description": "The ID of the task to update"},
-                            "title": {"type": "string", "description": "The new title of the task (optional)"},
-                            "description": {"type": "string", "description": "The new description of the task (optional)"},
-                            "priority": {
-                                "type": "string",
-                                "enum": ["low", "medium", "high"],
-                                "description": "New priority of the task (optional)"
-                            }
-                        },
-                        "required": ["user_id", "task_id"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "complete_task",
-                    "description": "Mark a task as completed",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "The ID of the user"},
-                            "task_id": {"type": "integer", "description": "The ID of the task to complete"}
-                        },
-                        "required": ["user_id", "task_id"]
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "delete_task",
-                    "description": "Delete a task from the user's todo list",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string", "description": "The ID of the user"},
-                            "task_id": {"type": "integer", "description": "The ID of the task to delete"}
-                        },
-                        "required": ["user_id", "task_id"]
-                    }
-                }
-            }
-        ]
+        return get_mcp_tool_definitions()
 
     async def process_command(
         self,
@@ -162,8 +97,23 @@ class AIAgentService:
         Returns:
             Dictionary containing the AI response and any tool calls made
         """
+        # Check if service is shutting down
+        if self._shutdown:
+            raise AIProcessingError("Service is shutting down, cannot process new requests")
+
         try:
-            logger.info(f"Processing command for user {user_id}: {message}")
+            # Sanitize and validate input
+            if not message or not message.strip():
+                raise AIProcessingError("Message cannot be empty")
+
+            # Limit message length to prevent prompt injection attacks
+            if len(message) > 1000:
+                raise AIProcessingError("Message is too long. Please keep it under 1000 characters.")
+
+            # Basic sanitization to prevent prompt injection
+            sanitized_message = self._sanitize_input(message)
+
+            logger.info(f"Processing command for user {user_id}: {sanitized_message}")
 
             # Reconstruct conversation context
             context = await self.context_reconstructor.reconstruct_context(user_id)
@@ -183,13 +133,12 @@ class AIAgentService:
             # Add the current user message
             messages.append({"role": "user", "content": message})
 
-            # Call the AI model with tools
-            response = await self.client.chat.completions.create(
-                model=self.model.openai_client._client.base_url.split('/')[-1] or "gemini-1.5-flash",
-                messages=messages,
-                tools=self.tools,
-                tool_choice="auto"
-            )
+            # Call the AI model with tools (with retry logic)
+            try:
+                response = await self._call_ai_model_with_retry(messages)
+            except Exception as e:
+                logger.error(f"Error calling AI model for user {user_id}: {str(e)}")
+                raise AIProcessingError(f"AI model error: {str(e)}")
 
             # Process the response
             ai_message = response.choices[0].message
@@ -203,7 +152,7 @@ class AIAgentService:
             for tool_call in tool_calls:
                 try:
                     # Determine if this is a destructive operation that requires confirmation
-                    if requires_confirmation and tool_call.function.name in ["delete_task"]:
+                    if requires_confirmation and self._is_destructive_operation(tool_call.function.name):
                         requires_confirmation_flag = True
 
                         # For destructive operations, just log that confirmation is needed
@@ -275,15 +224,27 @@ class AIAgentService:
             # Prepare the response
             response_content = ai_message.content or "I've processed your request."
 
+            # Moderate the AI response for safety
+            moderated_response = self._moderate_ai_response(response_content)
+
             return {
-                "response": response_content,
+                "response": moderated_response,
                 "tool_calls": executed_tool_calls,
                 "requires_confirmation": requires_confirmation_flag
             }
 
+        except AIProcessingError:
+            # Re-raise AI processing errors as they're already properly formatted
+            raise
+        except ContextRetrievalError:
+            # Re-raise context retrieval errors as they're already properly formatted
+            raise
+        except ToolExecutionError:
+            # Re-raise tool execution errors as they're already properly formatted
+            raise
         except Exception as e:
-            logger.error(f"Error processing command for user {user_id}: {str(e)}")
-            raise AIProcessingError(f"Error processing command: {str(e)}")
+            logger.error(f"Unexpected error processing command for user {user_id}: {str(e)}")
+            raise AIProcessingError("Sorry, I encountered an unexpected error while processing your request. Please try again.")
 
     async def _execute_mcp_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Execute an MCP tool with the given parameters."""
@@ -326,3 +287,156 @@ class AIAgentService:
             pass
 
         return await self.process_command(user_id, message, requires_confirmation=True)
+
+    def _is_destructive_operation(self, tool_name: str) -> bool:
+        """
+        Determine if a tool operation is destructive and requires user confirmation.
+
+        Args:
+            tool_name: Name of the tool to check
+
+        Returns:
+            Boolean indicating if the operation is destructive
+        """
+        destructive_operations = [
+            "delete_task",
+            # Add other potentially destructive operations here in the future
+        ]
+
+        return tool_name in destructive_operations
+
+    def _sanitize_input(self, message: str) -> str:
+        """
+        Sanitize user input to prevent prompt injection attacks.
+
+        Args:
+            message: The raw user message
+
+        Returns:
+            Sanitized message
+        """
+        # Remove any potential prompt injection patterns
+        # This is a basic implementation - in production, use more sophisticated methods
+        sanitized = message.strip()
+
+        # Remove excessive whitespace
+        sanitized = " ".join(sanitized.split())
+
+        # Basic filtering of potentially harmful patterns
+        # Note: This is a simple approach; consider using a dedicated library for production
+        harmful_patterns = [
+            "ignore previous instructions",
+            "ignore all previous",
+            "disregard previous",
+            "forget previous",
+            "new instructions:",
+            "system:",
+            "assistant:",
+        ]
+
+        lower_message = sanitized.lower()
+        for pattern in harmful_patterns:
+            if pattern in lower_message:
+                logger.warning(f"Potential prompt injection detected: {pattern}")
+                # Don't reject entirely, just log - the AI should handle it
+
+        return sanitized
+
+    def _moderate_ai_response(self, response: str) -> str:
+        """
+        Moderate AI response to ensure it doesn't contain harmful content.
+
+        Args:
+            response: The AI-generated response
+
+        Returns:
+            Moderated response
+        """
+        # Basic content moderation - in production, use a dedicated service
+        # Check for potentially harmful patterns
+        harmful_indicators = [
+            "ignore previous",
+            "disregard instructions",
+            "system prompt",
+            "as an ai language model",
+        ]
+
+        lower_response = response.lower()
+        for indicator in harmful_indicators:
+            if indicator in lower_response:
+                logger.warning(f"Potentially harmful content detected in AI response: {indicator}")
+                # Return a safe default response
+                return "I apologize, but I cannot process that request. Please try rephrasing your command."
+
+        # Check response length
+        if len(response) > 2000:
+            logger.warning("AI response too long, truncating")
+            return response[:1997] + "..."
+
+        return response
+
+    async def _call_ai_model_with_retry(
+        self,
+        messages: List[Dict[str, Any]],
+        max_retries: int = 3,
+        base_delay: float = 1.0
+    ) -> Any:
+        """
+        Call the AI model with exponential backoff retry logic for transient failures.
+
+        Args:
+            messages: The messages to send to the AI model
+            max_retries: Maximum number of retry attempts
+            base_delay: Base delay in seconds for exponential backoff
+
+        Returns:
+            The AI model response
+
+        Raises:
+            AIProcessingError: If all retries fail
+        """
+        last_exception = None
+
+        for attempt in range(max_retries):
+            try:
+                response = await self.client.chat.completions.create(
+                    model=self.model.openai_client._client.base_url.split('/')[-1] or "gemini-1.5-flash",
+                    messages=messages,
+                    tools=self.tools,
+                    tool_choice="auto"
+                )
+                return response
+
+            except Exception as e:
+                last_exception = e
+                error_str = str(e).lower()
+
+                # Check if this is a transient error that should be retried
+                transient_errors = [
+                    "timeout",
+                    "connection",
+                    "rate limit",
+                    "503",
+                    "502",
+                    "500",
+                    "429"
+                ]
+
+                is_transient = any(err in error_str for err in transient_errors)
+
+                if not is_transient or attempt == max_retries - 1:
+                    # Not a transient error or last attempt - don't retry
+                    logger.error(f"AI model call failed (attempt {attempt + 1}/{max_retries}): {str(e)}")
+                    raise
+
+                # Calculate exponential backoff delay
+                delay = base_delay * (2 ** attempt)
+                logger.warning(
+                    f"Transient error on attempt {attempt + 1}/{max_retries}: {str(e)}. "
+                    f"Retrying in {delay}s..."
+                )
+
+                await asyncio.sleep(delay)
+
+        # If we get here, all retries failed
+        raise AIProcessingError(f"AI model call failed after {max_retries} attempts: {str(last_exception)}")
