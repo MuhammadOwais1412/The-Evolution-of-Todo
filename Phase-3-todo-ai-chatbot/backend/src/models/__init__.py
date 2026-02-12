@@ -3,5 +3,7 @@
 # Import all models to register them with SQLModel
 from .task import Task  # noqa: F401
 from .tool_call_log import ToolCallLog  # noqa: F401
+from .conversation import Conversation  # noqa: F401
+from .message import Message, MessageRole  # noqa: F401
 
-__all__ = ["Task", "ToolCallLog"]
+__all__ = ["Task", "ToolCallLog", "Conversation", "Message", "MessageRole"]

@@ -51,12 +51,16 @@ app.add_middleware(
 # Import and include routers
 from src.api.tasks import router as tasks_router
 from src.api.routes.ai_chat import router as ai_chat_router
+from src.api.routes.chat import router as chat_router
 
 # Include task router
 app.include_router(tasks_router)
 
 # Include AI chat router
 app.include_router(ai_chat_router)
+
+# Include chat UI router
+app.include_router(chat_router)
 
 
 @app.get("/")

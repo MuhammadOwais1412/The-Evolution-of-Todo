@@ -13,62 +13,63 @@ This document consolidates research findings for integrating a chat UI with the 
 ## 1. OpenAI ChatKit Integration with Next.js
 
 ### Decision
-Use OpenAI ChatKit React components with Next.js 16+ App Router in a client component.
+Use custom React components instead of OpenAI ChatKit for the chat interface.
 
 ### Rationale
-- ChatKit provides pre-built, accessible chat UI components optimized for AI interactions
-- React-based, making it compatible with Next.js
-- Handles common chat patterns (message display, input, loading states) out of the box
-- Reduces development time and ensures consistent UX
-- Well-maintained by OpenAI with good TypeScript support
+After evaluating ChatKit (version 1.6.0), we discovered it requires backend protocol conformance:
+- ChatKit requires implementing `chatkit.server.ChatKitServer` protocol on the backend
+- Backend must use thread-based architecture and streaming event protocol
+- Our existing backend (FastAPI with custom AI Agent from Part B) uses a different architecture
+- Rewriting the backend to conform to ChatKit protocol would require:
+  - Changing from conversation-based to thread-based data models
+  - Implementing ChatKit's streaming event protocol
+  - Restructuring endpoints to match ChatKit's expectations
+  - Significant rework of Part B integration (~8-10 hours)
+- Custom components provide simpler, more direct integration with our existing backend
+- Full control over UI/UX without protocol constraints
+- Easier to maintain and debug
 
 ### Alternatives Considered
 
-1. **Custom Chat UI from Scratch**
-   - Pros: Full control, no external dependency
-   - Cons: Significant development time, need to handle accessibility, mobile responsiveness, edge cases
-   - Rejected: Violates "smallest viable change" principle
+1. **OpenAI ChatKit (Evaluated but Rejected)**
+   - Pros: Pre-built, accessible chat UI components optimized for AI interactions
+   - Cons: Requires backend protocol conformance, significant rework of existing architecture
+   - Rejected: Protocol requirements incompatible with our custom backend design
 
-2. **Other Chat Libraries (react-chat-elements, stream-chat-react)**
+2. **Custom Chat UI Components (Selected)**
+   - Pros: Full control, direct integration with existing backend, simpler architecture
+   - Cons: Need to implement UI patterns ourselves
+   - Selected: Best fit for our custom backend and existing AI Agent integration
+
+3. **Other Chat Libraries (react-chat-elements, stream-chat-react)**
    - Pros: Mature, feature-rich
    - Cons: Designed for multi-user chat, not AI interactions; heavier than needed
    - Rejected: Over-engineered for single-user AI chat use case
-
-3. **Headless UI + Custom Styling**
-   - Pros: Flexibility, lightweight
-   - Cons: Still requires significant custom development
-   - Rejected: ChatKit provides better starting point
 
 ### Implementation Notes
 
 **Installation**:
 ```bash
+# ChatKit package installed for type definitions only
 npm install @openai/chatkit
 ```
 
-**Usage Pattern**:
-```typescript
-'use client'; // Required for Next.js App Router
+**Custom Components Created**:
+- `MessageList.tsx` - Displays chat messages with auto-scroll
+- `MessageInput.tsx` - Input field with character limit and multi-line support
+- `ChatInterface.tsx` - Main container with error handling
+- `useChat.ts` - Custom hook for state management and API integration
+- `chatService.ts` - API client with retry logic
 
-import { ChatInterface } from '@openai/chatkit';
-
-export default function ChatPage() {
-  return (
-    <ChatInterface
-      messages={messages}
-      onSendMessage={handleSendMessage}
-      isLoading={isLoading}
-      // ... other props
-    />
-  );
-}
-```
-
-**Key Considerations**:
-- Must use `'use client'` directive for Next.js App Router (ChatKit uses React hooks)
-- State management handled via custom `useChat` hook
-- API calls handled via separate `chatService.ts` module
-- TypeScript types provided by ChatKit package
+**Key Features**:
+- Optimistic UI updates for immediate feedback
+- Auto-scroll to latest messages
+- Loading indicators and typing animations
+- Error handling with user-friendly messages
+- Retry logic with exponential backoff
+- Character limit validation (1000 chars)
+- Multi-line text support
+- Responsive design for mobile and desktop
 
 ---
 

@@ -12,17 +12,18 @@
     "db:setup": "npm run migrate && npm run verify-tables"
   },
   "dependencies": {
-    "better-auth": "^1.2.4",
-    "next": "^15.5.11",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
+    "@openai/chatkit": "^1.6.0",
     "axios": "^1.13.2",
+    "better-auth": "^1.2.4",
     "dotenv": "^17.2.3",
     "jsonwebtoken": "^9.0.3",
     "kysely": "^0.28.9",
+    "next": "^15.5.11",
     "pg": "^8.17.1",
+    "postcss": "^8.5.6",
     "postgres": "^3.4.8",
-    "postcss": "^8.5.6"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@better-auth/cli": "^1.4.14",
