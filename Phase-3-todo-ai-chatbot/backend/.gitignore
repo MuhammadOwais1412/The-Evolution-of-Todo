@@ -27,10 +27,16 @@ ENV/
 env/
 .ENV/
 
-# Environment
+# UV package manager
+.uv/
+
+# Environment variables (SENSITIVE)
 .env
 .env.local
 .env.*.local
+.env.production
+.env.staging
+.env.development
 
 # IDE
 .vscode/
@@ -45,22 +51,41 @@ env/
 .coverage
 htmlcov/
 *.cover
+.hypothesis/
+
+# Type checking and linting
+.mypy_cache/
+.ruff_cache/
+.pytype/
 
 # Logs
 *.log
+logs/
+*.log.*
 
 # Database
 *.db
 *.sqlite
+*.sqlite3
 
-# Scripts and docs specific to Phase-2-web-todo
-scripts/
-docs/
-*.md
-*.txt
-*.pdf
-*.doc
-*.docx
+# Secrets and certificates (SENSITIVE)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+*.credentials
+
+# API keys and tokens (SENSITIVE)
+*_api_key*
+*_secret*
+*_token*
+*.secret
+
+# Process files
+*.pid
 
 # Backup and temporary files
 *~
@@ -70,3 +95,18 @@ docs/
 *.temp
 *.old
 *.orig
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Local configuration
+local_settings.py
+instance/
+
+# UV lock file (optional - some projects commit this)
+# uv.lock

@@ -14,9 +14,9 @@ class Conversation(SQLModel, table=True):
     __tablename__ = "conversations"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: str = Field(foreign_key="tasks.user_id", index=True, nullable=False)
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    user_id: str = Field(index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships
     messages: List["Message"] = Relationship(

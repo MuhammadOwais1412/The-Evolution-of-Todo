@@ -12,7 +12,7 @@ from ..schemas.task_schemas import (
     TaskSchema
 )
 from .auth_validation import validate_user_from_token, verify_user_owns_task, validate_user_id
-from ..db import async_session_factory
+from ...db import async_session_factory
 from datetime import datetime
 import logging
 

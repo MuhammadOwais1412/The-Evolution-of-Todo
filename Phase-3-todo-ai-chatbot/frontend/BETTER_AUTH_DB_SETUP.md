@@ -34,7 +34,7 @@ Use one of the following methods to create the required tables:
 #### Method 1: Using npm scripts (recommended)
 
 ```bash
-cd Phase-2-web-todo/frontend
+cd Phase-3-todo-ai-chatbot/frontend
 npm run db:setup
 ```
 
@@ -43,7 +43,7 @@ This runs both the migration and verification scripts in sequence.
 #### Method 2: Run scripts individually
 
 ```bash
-cd Phase-2-web-todo/frontend
+cd Phase-3-todo-ai-chatbot/frontend
 npm run migrate          # Create tables
 npm run verify-tables    # Verify tables were created correctly
 ```

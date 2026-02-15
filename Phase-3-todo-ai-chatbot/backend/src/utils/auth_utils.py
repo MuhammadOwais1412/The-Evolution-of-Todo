@@ -5,7 +5,6 @@ import jwt
 from fastapi import HTTPException, status, Request
 from ..config import get_settings
 from sqlmodel import Session
-from ..models.user import User
 from ..services.auth import verify_token  # Assuming this exists from the existing auth system
 
 

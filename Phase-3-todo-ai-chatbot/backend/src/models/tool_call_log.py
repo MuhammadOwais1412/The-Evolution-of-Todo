@@ -1,7 +1,8 @@
 """SQLModel for logging AI agent tool calls."""
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, TYPE_CHECKING
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import JSON
+from typing import Optional, Dict, Any, TYPE_CHECKING
 from uuid import UUID, uuid4
 import enum
 
@@ -22,15 +23,15 @@ class ToolCallLog(SQLModel, table=True):
     __tablename__ = "tool_call_logs"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(foreign_key="users.id", nullable=False)
-    session_id: UUID = Field(default_factory=uuid4, nullable=False)  # Identifier for the conversation session
-    tool_name: str = Field(nullable=False)  # Name of the MCP tool called
-    tool_params: dict = Field(default={}, sa_column_kwargs={"server_default": "{}"})  # Parameters passed to the tool
-    result: dict = Field(default={}, sa_column_kwargs={"server_default": "{}"})  # Result returned from the tool
-    status: ToolCallStatus = Field(sa_column_kwargs={"server_default": "pending"})  # Status of the call
-    error_details: Optional[dict] = Field(default=None)  # Error information if status is 'error'
-    timestamp: datetime = Field(default_factory=datetime.utcnow, nullable=False)  # When the tool was called
-    ai_confidence: Optional[float] = Field(default=None)  # Optional confidence score from AI agent
+    user_id: UUID = Field(index=True)
+    session_id: UUID = Field(default_factory=uuid4)
+    tool_name: str = Field()
+    tool_params: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    result: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    status: ToolCallStatus = Field(default=ToolCallStatus.PENDING)
+    error_details: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    ai_confidence: Optional[float] = Field(default=None)
 
     # Relationship to user (if needed)
     # user: User = Relationship(back_populates="tool_call_logs")

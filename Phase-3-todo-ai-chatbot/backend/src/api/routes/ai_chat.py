@@ -1,13 +1,13 @@
 """AI chat router for handling natural language todo commands."""
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from fastapi.security import HTTPBearer
 from fastapi_limiter.depends import RateLimiter
 
 from ...schemas.ai_schemas import AIChatRequest, AIChatResponse, HealthCheckResponse
-from ...utils.auth_utils import get_current_user_from_token
+from ...api.deps import get_current_user
 from ...ai.agent_service import AIAgentService
 from ...ai.confirmation_handler import ConfirmationHandler
 from ...exceptions.ai_exceptions import (
@@ -49,11 +49,11 @@ security = HTTPBearer()
 @router.post(
     "/chat",
     response_model=AIChatResponse,
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]  # Rate limit: 10 requests per minute
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))]  # Rate limit: 10 requests per minute - TODO: Fix rate limiter syntax
 )
 async def ai_chat_endpoint(
     request: AIChatRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user_from_token),
+    current_user: str = Depends(get_current_user),
     agent_service: AIAgentService = Depends(get_ai_agent_service)
 ) -> AIChatResponse:
     """
@@ -68,11 +68,11 @@ async def ai_chat_endpoint(
         AIChatResponse containing the AI response and any tool calls made
     """
     try:
-        logger.info(f"Received AI chat request from user {current_user['user_id']}: {request.message}")
+        logger.info(f"Received AI chat request from user {current_user}: {request.message}")
 
         # Process the command through the AI agent
         result = await agent_service.process_command(
-            user_id=current_user['user_id'],
+            user_id=current_user,
             message=request.message,
             requires_confirmation=request.requires_confirmation
         )
@@ -86,26 +86,26 @@ async def ai_chat_endpoint(
             message="Successfully processed AI command"
         )
 
-        logger.info(f"Successfully processed AI chat request for user {current_user['user_id']}")
+        logger.info(f"Successfully processed AI chat request for user {current_user}")
         return response
 
     except UserPermissionError as e:
-        logger.warning(f"Permission error for user {current_user['user_id']}: {str(e)}")
+        logger.warning(f"Permission error for user {current_user}: {str(e)}")
         raise HTTPException(status_code=403, detail=f"Permission denied: {str(e)}")
 
     except (AIProcessingError, ToolExecutionError, ContextRetrievalError) as e:
-        logger.error(f"Error processing AI command for user {current_user['user_id']}: {str(e)}")
+        logger.error(f"Error processing AI command for user {current_user}: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error processing command: {str(e)}")
 
     except Exception as e:
-        logger.error(f"Unexpected error in AI chat endpoint for user {current_user['user_id']}: {str(e)}")
+        logger.error(f"Unexpected error in AI chat endpoint for user {current_user}: {str(e)}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 
 @router.post("/confirm/{confirmation_id}")
 async def ai_confirmation_endpoint(
     confirmation_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user_from_token),
+    current_user: str = Depends(get_current_user),
     agent_service: AIAgentService = Depends(get_ai_agent_service),
     confirmation_handler: ConfirmationHandler = Depends(get_confirmation_handler)
 ) -> AIChatResponse:
@@ -122,12 +122,12 @@ async def ai_confirmation_endpoint(
         AIChatResponse containing the result of the confirmed action
     """
     try:
-        logger.info(f"Received confirmation {confirmation_id} from user {current_user['user_id']}")
+        logger.info(f"Received confirmation {confirmation_id} from user {current_user}")
 
         # Validate the confirmation request
         confirmation_data = await confirmation_handler.validate_confirmation(
             confirmation_id,
-            current_user['user_id']
+            current_user
         )
 
         # Execute the confirmed action
@@ -161,29 +161,29 @@ async def ai_confirmation_endpoint(
             message="Successfully processed confirmed action"
         )
 
-        logger.info(f"Successfully processed confirmation {confirmation_id} for user {current_user['user_id']}")
+        logger.info(f"Successfully processed confirmation {confirmation_id} for user {current_user}")
         return response
 
     except UserPermissionError as e:
-        logger.warning(f"Permission error for user {current_user['user_id']}: {str(e)}")
+        logger.warning(f"Permission error for user {current_user}: {str(e)}")
         raise HTTPException(status_code=403, detail=f"Permission denied: {str(e)}")
 
     except ConfirmationError as e:
-        logger.warning(f"Confirmation error for user {current_user['user_id']}: {str(e)}")
+        logger.warning(f"Confirmation error for user {current_user}: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Confirmation error: {str(e)}")
 
     except (AIProcessingError, ToolExecutionError, ContextRetrievalError) as e:
-        logger.error(f"Error processing confirmation for user {current_user['user_id']}: {str(e)}")
+        logger.error(f"Error processing confirmation for user {current_user}: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error processing confirmation: {str(e)}")
 
     except Exception as e:
-        logger.error(f"Unexpected error in confirmation endpoint for user {current_user['user_id']}: {str(e)}")
+        logger.error(f"Unexpected error in confirmation endpoint for user {current_user}: {str(e)}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 
 @router.get("/pending-confirmations")
 async def get_pending_confirmations(
-    current_user: Dict[str, Any] = Depends(get_current_user_from_token),
+    current_user: str = Depends(get_current_user),
     confirmation_handler: ConfirmationHandler = Depends(get_confirmation_handler)
 ) -> Dict[str, Any]:
     """
@@ -197,14 +197,14 @@ async def get_pending_confirmations(
         Dictionary containing pending confirmations
     """
     try:
-        logger.info(f"Retrieving pending confirmations for user {current_user['user_id']}")
+        logger.info(f"Retrieving pending confirmations for user {current_user}")
 
         pending_confirmations = await confirmation_handler.get_pending_confirmations(
-            current_user['user_id']
+            current_user
         )
 
         return {
-            "user_id": current_user['user_id'],
+            "user_id": current_user,
             "pending_confirmations": pending_confirmations,
             "count": len(pending_confirmations),
             "success": True,
@@ -212,14 +212,14 @@ async def get_pending_confirmations(
         }
 
     except Exception as e:
-        logger.error(f"Error retrieving pending confirmations for user {current_user['user_id']}: {str(e)}")
+        logger.error(f"Error retrieving pending confirmations for user {current_user}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error retrieving pending confirmations")
 
 
 @router.post("/reject/{confirmation_id}")
 async def reject_confirmation(
     confirmation_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user_from_token),
+    current_user: str = Depends(get_current_user),
     confirmation_handler: ConfirmationHandler = Depends(get_confirmation_handler)
 ) -> Dict[str, Any]:
     """
@@ -234,11 +234,11 @@ async def reject_confirmation(
         Dictionary with rejection result
     """
     try:
-        logger.info(f"Received rejection for confirmation {confirmation_id} from user {current_user['user_id']}")
+        logger.info(f"Received rejection for confirmation {confirmation_id} from user {current_user}")
 
         result = await confirmation_handler.reject_confirmation(
             confirmation_id,
-            current_user['user_id']
+            current_user
         )
 
         return {
@@ -264,7 +264,7 @@ async def reject_confirmation(
 
 @router.get("/tool-call-log")
 async def get_tool_call_logs(
-    current_user: Dict[str, Any] = Depends(get_current_user_from_token),
+    current_user: str = Depends(get_current_user),
     limit: int = 20,
     offset: int = 0,
     tool_name: Optional[str] = None,
@@ -290,7 +290,7 @@ async def get_tool_call_logs(
         Dictionary containing the audit log entries
     """
     try:
-        logger.info(f"Retrieving tool call logs for user {current_user['user_id']}")
+        logger.info(f"Retrieving tool call logs for user {current_user}")
 
         from ...ai.audit_logger import AuditLogger
         audit_logger = AuditLogger()
@@ -331,7 +331,7 @@ async def get_tool_call_logs(
 
         # Retrieve the logs
         logs = await audit_logger.get_tool_call_history(
-            user_id=current_user['user_id'],
+            user_id=current_user,
             tool_name=tool_name_enum.value if tool_name_enum else None,
             status=status_enum if status_enum else None,
             limit=limit,
@@ -356,7 +356,7 @@ async def get_tool_call_logs(
         total_count = len(formatted_logs)  # In a real implementation, this would be a separate count query
 
         return {
-            "user_id": current_user['user_id'],
+            "user_id": current_user,
             "logs": formatted_logs,
             "pagination": {
                 "limit": limit,
@@ -468,7 +468,7 @@ async def ai_health_check(agent_service: AIAgentService = Depends(get_ai_agent_s
 
 @router.get("/metrics")
 async def get_ai_metrics(
-    current_user: Dict[str, Any] = Depends(get_current_user_from_token),
+    current_user: str = Depends(get_current_user),
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     agent_service: AIAgentService = Depends(get_ai_agent_service)
@@ -508,14 +508,14 @@ async def get_ai_metrics(
 
         # Get user usage stats
         stats = await audit_logger.get_user_tool_usage_stats(
-            user_id=current_user['user_id'],
+            user_id=current_user,
             start_date=start_datetime,
             end_date=end_datetime
         )
 
         # Add additional metrics
         metrics = {
-            "user_id": current_user['user_id'],
+            "user_id": current_user,
             "period": {
                 "start": start_date,
                 "end": end_date
@@ -533,7 +533,7 @@ async def get_ai_metrics(
             successful_calls = stats.get("successful_calls", 0)
             metrics["success_rate"] = successful_calls / stats["total_calls"]
 
-        logger.info(f"Retrieved metrics for user {current_user['user_id']}")
+        logger.info(f"Retrieved metrics for user {current_user}")
         return {
             "metrics": metrics,
             "success": True,
@@ -541,13 +541,13 @@ async def get_ai_metrics(
         }
 
     except Exception as e:
-        logger.error(f"Error retrieving metrics for user {current_user['user_id']}: {str(e)}")
+        logger.error(f"Error retrieving metrics for user {current_user}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error retrieving metrics")
 
 
 @router.get("/usage-stats")
 async def get_user_usage_stats(
-    current_user: Dict[str, Any] = Depends(get_current_user_from_token),
+    current_user: str = Depends(get_current_user),
     agent_service: AIAgentService = Depends(get_ai_agent_service)
 ) -> Dict[str, Any]:
     """
@@ -566,15 +566,15 @@ async def get_user_usage_stats(
         from ...ai.audit_logger import AuditLogger
         audit_logger = AuditLogger()
 
-        stats = await audit_logger.get_user_tool_usage_stats(current_user['user_id'])
+        stats = await audit_logger.get_user_tool_usage_stats(current_user)
 
         return {
-            "user_id": current_user['user_id'],
+            "user_id": current_user,
             "stats": stats,
             "success": True,
             "message": "Successfully retrieved usage stats"
         }
 
     except Exception as e:
-        logger.error(f"Error retrieving usage stats for user {current_user['user_id']}: {str(e)}")
+        logger.error(f"Error retrieving usage stats for user {current_user}: {str(e)}")
         raise HTTPException(status_code=500, detail="Error retrieving usage stats")

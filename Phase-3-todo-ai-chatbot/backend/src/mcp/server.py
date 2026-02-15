@@ -6,8 +6,8 @@ from mcp.types import ClientCapabilities, EndUserId
 import asyncio
 import logging
 from typing import Dict, Any, List
-from ..models.task import Task
-from ..db import get_session
+from ...models.task import Task
+from ...db import get_session
 from .tools.task_operations import add_task, list_tasks, update_task, complete_task, delete_task
 from .schemas.task_schemas import AddTaskRequest, AddTaskResponse, ListTasksRequest, ListTasksResponse, UpdateTaskRequest, UpdateTaskResponse, CompleteTaskRequest, CompleteTaskResponse, DeleteTaskRequest, DeleteTaskResponse, ErrorResponse
 

@@ -24,20 +24,17 @@ class Message(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     conversation_id: UUID = Field(
         foreign_key="conversations.id",
-        index=True,
-        nullable=False
-    )
-    role: MessageRole = Field(
-        sa_column=Column(SQLEnum(MessageRole)),
-        nullable=False
-    )
-    content: str = Field(nullable=False, max_length=10000)
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        nullable=False,
         index=True
     )
-    metadata: Optional[Dict[str, Any]] = Field(
+    role: MessageRole = Field(
+        sa_column=Column(SQLEnum(MessageRole), nullable=False)
+    )
+    content: str = Field(max_length=10000)
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow,
+        index=True
+    )
+    message_metadata: Optional[Dict[str, Any]] = Field(
         default=None,
         sa_column=Column(JSON)
     )

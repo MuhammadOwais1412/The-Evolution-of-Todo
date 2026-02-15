@@ -95,3 +95,17 @@ class UnsafeContentError(AIAgentException):
 
     def __init__(self, message: str = "Potentially unsafe content detected"):
         super().__init__(message, "UNSAFE_CONTENT_DETECTED")
+
+
+class AuditLoggingError(AIAgentException):
+    """Raised when there's an error logging audit information."""
+
+    def __init__(self, message: str = "Error occurred while logging audit information"):
+        super().__init__(message, "AUDIT_LOGGING_ERROR")
+
+
+class ConfirmationError(AIAgentException):
+    """Raised when there's an error with confirmation handling."""
+
+    def __init__(self, message: str = "Error occurred during confirmation handling"):
+        super().__init__(message, "CONFIRMATION_ERROR")

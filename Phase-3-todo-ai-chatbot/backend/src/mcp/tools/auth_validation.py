@@ -6,8 +6,8 @@ import jwt
 from datetime import datetime
 from ...config import get_settings
 from sqlmodel import select
-from ..models.task import Task
-from ..db import async_session_factory
+from ...models.task import Task
+from ...db import async_session_factory
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 
