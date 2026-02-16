@@ -38,7 +38,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://todo-web-application-rust.vercel.app",  # Production Vercel frontend
+        "https://the-evolution-of-todo-ai.vercel.app",  # Production Vercel frontend
         "http://localhost:3000",  # Local development
         "http://localhost:3001",  # Alternative local dev port
     ],
